@@ -15,80 +15,20 @@ function saveStats() {
   updateDashboard();
 }
 
-// --- Top View Switching (Home, Dashboard, Report Crime) ---
-function switchSection(viewId) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+// --- Login-First Gate Logic ---
+const loginGate = document.getElementById('loginGate');
+const appShell = document.getElementById('appShell');
 
-  const targetView = document.getElementById(viewId);
-  if (targetView) targetView.classList.add('active');
-
-  const activeNav = document.querySelector(`.nav-btn[data-section="${viewId}"]`);
-  if (activeNav) activeNav.classList.add('active');
-
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-
-function goToFeedback() {
-  switchSection('home');
-  setTimeout(() => {
-    const fb = document.getElementById('feedbackSection');
-    if (fb) fb.scrollIntoView({ behavior: 'smooth' });
-  }, 60);
-}
-
-function openModule(toolId) {
-  switchSection('dashboard');
-  switchTool(toolId);
-}
-
-// --- Dashboard Tool Tabs ---
-function switchTool(toolId) {
-  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
-
-  const panel = document.getElementById(toolId);
-  if (panel) panel.classList.add('active');
-
-  const btn = document.querySelector(`.tool-btn[data-tool="${toolId}"]`);
-  if (btn) btn.classList.add('active');
-}
-
-document.querySelectorAll('.tool-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchTool(btn.dataset.tool));
-});
-
-// --- Update Stats & Profile UI ---
-function updateDashboard() {
-  document.getElementById('statLinks').textContent = stats.linksChecked;
-  document.getElementById('statQuizzes').textContent = stats.quizzesCompleted;
-  document.getElementById('statScenarios').textContent = stats.scenariosSolved;
-
-  const readiness = Math.min(
-    100,
-    Math.round((stats.lastQuizScore * 0.5) + (stats.scenariosSolved * 10) + (stats.linksChecked * 5))
-  );
-  document.getElementById('statScore').textContent = `${readiness}%`;
-
-  const welcomeText = document.getElementById('welcomeText');
-  const navAuth = document.getElementById('navAuth');
-
+function checkAuthState() {
   if (currentUser) {
-    welcomeText.textContent = `Welcome back, ${currentUser.name}! Your personal CyberShield safety workspace is active.`;
-    navAuth.innerHTML = `<span style="margin-right:10px;color:#bae6fd;font-weight:600;">👤 ${currentUser.name}</span>
-      <button class="btn-baby" onclick="logout()">Logout</button>`;
+    loginGate.classList.add('hidden');
+    appShell.classList.remove('hidden');
+    updateDashboard();
   } else {
-    welcomeText.textContent = 'Test suspicious links, spot fake payment screenshots, practice scam scenarios, and get instant victim reporting assistance.';
-    navAuth.innerHTML = `<button class="btn-baby" id="openAuthBtn">Login / Profile</button>`;
-    document.getElementById('openAuthBtn').addEventListener('click', () => {
-      document.getElementById('authModal').classList.remove('hidden');
-    });
+    loginGate.classList.remove('hidden');
+    appShell.classList.add('hidden');
   }
 }
-
-// --- Soft Pastel ("Baby") Auth Modal Logic ---
-const authModal = document.getElementById('authModal');
-document.getElementById('closeAuthBtn').addEventListener('click', () => authModal.classList.add('hidden'));
 
 document.getElementById('loginTabBtn').addEventListener('click', () => {
   document.getElementById('loginTabBtn').classList.add('active');
@@ -135,8 +75,7 @@ document.getElementById('registerForm').addEventListener('submit', (e) => {
   localStorage.setItem('cs_users', JSON.stringify(users));
   currentUser = newUser;
   localStorage.setItem('cs_currentUser', JSON.stringify(currentUser));
-  authModal.classList.add('hidden');
-  updateDashboard();
+  checkAuthState();
 });
 
 document.getElementById('loginForm').addEventListener('submit', (e) => {
@@ -148,23 +87,107 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
   const users = JSON.parse(localStorage.getItem('cs_users')) || [];
   const found = users.find(u => u.email === email && u.password === password);
   if (!found) {
-    msg.textContent = 'Invalid email or password.';
+    msg.textContent = 'Invalid email or password (or use Create Profile / Demo Login).';
     return;
   }
 
   currentUser = found;
   localStorage.setItem('cs_currentUser', JSON.stringify(currentUser));
-  authModal.classList.add('hidden');
-  updateDashboard();
+  checkAuthState();
+});
+
+document.getElementById('demoQuickLoginBtn').addEventListener('click', () => {
+  currentUser = { name: 'Dedeepya Reddy', email: 'citizen@cybershield.in' };
+  localStorage.setItem('cs_currentUser', JSON.stringify(currentUser));
+  checkAuthState();
 });
 
 function logout() {
   currentUser = null;
   localStorage.removeItem('cs_currentUser');
-  updateDashboard();
+  closeProfileMenu();
+  checkAuthState();
 }
 
-// --- Scrollable Home Feedback Submission ---
+// --- Top-Right Profile Menu ---
+const profileMenuBtn = document.getElementById('profileMenuBtn');
+const profileDropdown = document.getElementById('profileDropdown');
+
+profileMenuBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  profileDropdown.classList.toggle('hidden');
+});
+
+function closeProfileMenu() {
+  profileDropdown.classList.add('hidden');
+}
+
+document.addEventListener('click', () => closeProfileMenu());
+
+// --- Navigation (Home, Dashboard, Report Crime, Feedback) ---
+function switchSection(viewId) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+
+  const targetView = document.getElementById(viewId);
+  if (targetView) targetView.classList.add('active');
+
+  const activeNav = document.querySelector(`.nav-btn[data-section="${viewId}"]`);
+  if (activeNav) activeNav.classList.add('active');
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToFeedback() {
+  switchSection('home');
+  setTimeout(() => {
+    const fb = document.getElementById('feedbackSection');
+    if (fb) fb.scrollIntoView({ behavior: 'smooth' });
+  }, 60);
+}
+
+function openModule(toolId) {
+  switchSection('dashboard');
+  switchTool(toolId);
+}
+
+function switchTool(toolId) {
+  document.querySelectorAll('.tool-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+
+  const panel = document.getElementById(toolId);
+  if (panel) panel.classList.add('active');
+
+  const btn = document.querySelector(`.tool-btn[data-tool="${toolId}"]`);
+  if (btn) btn.classList.add('active');
+}
+
+document.querySelectorAll('.tool-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTool(btn.dataset.tool));
+});
+
+// --- Update Stats & Profile UI ---
+function updateDashboard() {
+  document.getElementById('statLinks').textContent = stats.linksChecked;
+  document.getElementById('statQuizzes').textContent = stats.quizzesCompleted;
+  document.getElementById('statScenarios').textContent = stats.scenariosSolved;
+
+  const readiness = Math.min(
+    100,
+    Math.round((stats.lastQuizScore * 0.5) + (stats.scenariosSolved * 10) + (stats.linksChecked * 5))
+  );
+  document.getElementById('statScore').textContent = `${readiness}%`;
+
+  if (currentUser) {
+    document.getElementById('profileInitial').textContent = currentUser.name.charAt(0).toUpperCase();
+    document.getElementById('profileNameLabel').textContent = currentUser.name.split(' ')[0];
+    document.getElementById('dropFullName').textContent = currentUser.name;
+    document.getElementById('dropEmail').textContent = currentUser.email;
+    document.getElementById('welcomeText').textContent = `Welcome back, ${currentUser.name}! Your personal CyberShield safety workspace is active.`;
+  }
+}
+
+// --- Feedback Form ---
 document.getElementById('feedbackForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const name = document.getElementById('fbName').value.trim();
@@ -191,13 +214,11 @@ function copyHelpline() {
 }
 
 function toggleChecklist() {
-  const box = document.getElementById('victimPrepBox');
-  box.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('victimPrepBox').scrollIntoView({ behavior: 'smooth' });
 }
 
-// --- Tool 1: Suspicious Link Checker ---
-document.getElementById('checkUrlBtn').addEventListener('click', () => {
-  const rawUrl = document.getElementById('urlInput').value.trim();
+// --- Tool 1: Suspicious Link Checker + Example URLs ---
+function analyzeUrl(rawUrl) {
   const resultBox = document.getElementById('urlResult');
   if (!rawUrl) return;
 
@@ -211,7 +232,7 @@ document.getElementById('checkUrlBtn').addEventListener('click', () => {
   }
   if (/https?:\/\/\d+\.\d+\.\d+\.\d+/.test(lower)) {
     riskScore += 40;
-    flags.push('Uses a raw IP address instead of a domain name.');
+    flags.push('Uses a raw IP address instead of a legitimate domain name.');
   }
   if (/\.(xyz|tk|ml|ga|cf|top|click)(\/|$)/.test(lower)) {
     riskScore += 30;
@@ -219,11 +240,11 @@ document.getElementById('checkUrlBtn').addEventListener('click', () => {
   }
   if (lower.includes('@')) {
     riskScore += 35;
-    flags.push('Contains "@" symbol, which can mask the real destination.');
+    flags.push('Contains "@" symbol, which masks the real destination server.');
   }
-  if (/(login|verify|update|bank|secure|free-gift|prize)/.test(lower)) {
+  if (/(login|verify|update|bank|secure|free-gift|prize|kyc|alert)/.test(lower)) {
     riskScore += 20;
-    flags.push('Contains common phishing trigger keywords.');
+    flags.push('Contains common phishing urgency/trigger keywords.');
   }
 
   resultBox.classList.remove('hidden', 'safe', 'warn', 'danger');
@@ -235,54 +256,157 @@ document.getElementById('checkUrlBtn').addEventListener('click', () => {
     resultBox.innerHTML = `<strong>⚠️ Moderate Risk (${riskScore}/100)</strong><ul>${flags.map(f => `<li>${f}</li>`).join('')}</ul>`;
   } else {
     resultBox.classList.add('safe');
-    resultBox.innerHTML = `<strong>✅ Looks Safe (Low Risk)</strong><p>No obvious phishing patterns detected. Always verify the sender before entering credentials.</p>`;
+    resultBox.innerHTML = `<strong>✅ Looks Safe (Low Risk)</strong><p>Uses HTTPS and no suspicious phishing patterns were found.</p>`;
   }
 
   stats.linksChecked++;
   saveStats();
+}
+
+document.getElementById('checkUrlBtn').addEventListener('click', () => {
+  analyzeUrl(document.getElementById('urlInput').value.trim());
 });
 
-// --- Tool 2: Pre-Assessment Quiz ---
-const quizQuestions = [
-  {
-    q: 'Which of the following is the strongest password practice?',
-    options: ['Using your birthday + name', 'Using a unique 12+ character passphrase for each site', 'Reusing one complex password everywhere'],
-    answer: 1
-  },
-  {
-    q: 'You receive an urgent SMS saying your bank account is suspended with a link. What should you do?',
-    options: ['Click the link immediately', 'Reply with your PIN', 'Open your official bank app or call the number on your card'],
-    answer: 2
-  },
-  {
-    q: 'What is the national cybercrime helpline number in India to report financial fraud immediately?',
-    options: ['1930', '108', '1999'],
-    answer: 0
-  }
-];
+function testExampleUrl(sampleUrl) {
+  document.getElementById('urlInput').value = sampleUrl;
+  analyzeUrl(sampleUrl);
+}
 
+// --- Tool 2: 3-Stage Assessments (Pre, Mid, Post) ---
+const assessmentBanks = {
+  pre: {
+    label: 'Pre-Assessment (Baseline Check)',
+    questions: [
+      {
+        q: 'Which of the following is the strongest password practice?',
+        options: ['Using your birthday + name', 'Using a unique 12+ character passphrase for each site', 'Reusing one complex password everywhere'],
+        answer: 1
+      },
+      {
+        q: 'You receive an urgent SMS saying your bank account is suspended with a link. What should you do?',
+        options: ['Click the link immediately', 'Reply with your PIN', 'Open your official bank app or call the number on your card'],
+        answer: 2
+      },
+      {
+        q: 'What does Two-Factor Authentication (2FA) protect against?',
+        options: ['Stolen passwords alone', 'Slow internet speeds', 'Hardware damage'],
+        answer: 0
+      },
+      {
+        q: 'Do you ever need to enter your UPI PIN to RECEIVE money into your bank account?',
+        options: ['Yes, always', 'No—UPI PIN is only required to SEND money', 'Only for amounts above ₹5,000'],
+        answer: 1
+      }
+    ]
+  },
+  mid: {
+    label: 'Mid-Assessment (Applied Scam Detection)',
+    questions: [
+      {
+        q: 'A link reads "https://sbi-kyc.verify-user.xyz". Which part is the actual domain you are connecting to?',
+        options: ['sbi-kyc.com', 'verify-user.xyz', 'sbi.co.in'],
+        answer: 1
+      },
+      {
+        q: 'A buyer sends a UPI payment screenshot claiming they paid ₹4,000, but your bank SMS has not arrived. What should you do?',
+        options: ['Hand over the item immediately', 'Open your own UPI/bank app and check actual credited balance first', 'Ask them to send another screenshot'],
+        answer: 1
+      },
+      {
+        q: 'An unknown caller asks you to install AnyDesk or TeamViewer to "fix a KYC issue". What is the risk?',
+        options: ['They can view your screen and capture OTPs/banking credentials', 'It speeds up your phone', 'No risk if you keep Wi-Fi on'],
+        answer: 0
+      },
+      {
+        q: 'Which URL indicator shows encrypted communication between your browser and a website?',
+        options: ['http://', 'https:// with a valid domain', 'ftp://'],
+        answer: 1
+      },
+      {
+        q: 'What is "Digital Arrest" scam?',
+        options: ['A real CBI arrest over WhatsApp video call', 'Fraudsters impersonating police/customs on video calls to extort money', 'An official court summons via SMS'],
+        answer: 1
+      }
+    ]
+  },
+  post: {
+    label: 'Post-Assessment (Mastery & Emergency Response)',
+    questions: [
+      {
+        q: 'What is the National Cybercrime Helpline number in India for immediate financial fraud reporting?',
+        options: ['1930', '108', '1999'],
+        answer: 0
+      },
+      {
+        q: 'Within how many hours ("Golden Hour") should financial cyber fraud be reported to maximize chances of freezing funds?',
+        options: ['Within the first 1–2 hours', 'After 15 days', 'Only after visiting a court'],
+        answer: 0
+      },
+      {
+        q: 'Which is the official Government of India portal for filing online cybercrime complaints?',
+        options: ['https://cybercrime.gov.in', 'http://india-cyber-help.tk', 'https://report-scam-now.xyz'],
+        answer: 0
+      },
+      {
+        q: 'What 12-digit number is most critical to give 1930 officers when reporting a fraudulent UPI transaction?',
+        options: ['Your phone IMEI', 'The 12-digit UTR / UPI Transaction Reference Number', 'Your Aadhaar enrollment ID'],
+        answer: 1
+      },
+      {
+        q: 'After spotting a phishing email on your account, what is the safest complete response?',
+        options: ['Forward it to 10 friends', 'Do not click links, mark as phishing/spam, and enable 2FA if you interacted with it', 'Reply asking the scammer to stop'],
+        answer: 1
+      }
+    ]
+  }
+};
+
+let currentStage = 'pre';
 let quizIdx = 0;
 let quizCorrect = 0;
 
+function selectAssessmentStage(stage) {
+  currentStage = stage;
+  quizIdx = 0;
+  quizCorrect = 0;
+  document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
+  const activeBtn = document.querySelector(`.stage-btn[data-stage="${stage}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+  renderQuiz();
+}
+
 function renderQuiz() {
   const container = document.getElementById('quizContainer');
-  if (quizIdx >= quizQuestions.length) {
-    const pct = Math.round((quizCorrect / quizQuestions.length) * 100);
+  const bank = assessmentBanks[currentStage];
+  const questions = bank.questions;
+
+  if (quizIdx >= questions.length) {
+    const pct = Math.round((quizCorrect / questions.length) * 100);
     stats.quizzesCompleted++;
     stats.lastQuizScore = pct;
     saveStats();
-    container.innerHTML = `<h4>Quiz Complete!</h4><p>You scored <strong>${quizCorrect}/${quizQuestions.length} (${pct}%)</strong>.</p>
-      <button class="btn-primary" style="margin-top:1rem;" onclick="resetQuiz()">Retake Quiz</button>`;
+    container.innerHTML = `
+      <div class="result-box safe">
+        <h4>🎉 ${bank.label} Complete!</h4>
+        <p style="margin:0.5rem 0;">You scored <strong>${quizCorrect} out of ${questions.length} (${pct}%)</strong>.</p>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
+          <button class="btn-primary" onclick="resetQuiz()">Retake This Stage</button>
+          ${currentStage === 'pre' ? `<button class="btn-secondary" onclick="selectAssessmentStage('mid')">Proceed to Assessment →</button>` : ''}
+          ${currentStage === 'mid' ? `<button class="btn-secondary" onclick="selectAssessmentStage('post')">Proceed to Post-Assessment →</button>` : ''}
+        </div>
+      </div>`;
     return;
   }
 
-  const item = quizQuestions[quizIdx];
-  container.innerHTML = `<h4>Question ${quizIdx + 1} of ${quizQuestions.length}</h4><p style="margin:0.75rem 0;">${item.q}</p>` +
+  const item = questions[quizIdx];
+  container.innerHTML = `
+    <div style="color:#38bdf8;font-size:0.88rem;font-weight:600;margin-bottom:0.35rem;">${bank.label} — Question ${quizIdx + 1} of ${questions.length}</div>
+    <p style="margin:0.65rem 0;font-size:1.05rem;">${item.q}</p>` +
     item.options.map((opt, i) => `<button class="option-btn" onclick="answerQuiz(${i})">${opt}</button>`).join('');
 }
 
 function answerQuiz(choice) {
-  if (choice === quizQuestions[quizIdx].answer) quizCorrect++;
+  if (choice === assessmentBanks[currentStage].questions[quizIdx].answer) quizCorrect++;
   quizIdx++;
   renderQuiz();
 }
@@ -341,7 +465,7 @@ function nextScenario() {
   renderScenario();
 }
 
-// --- Tool 4: Fake Payment Screenshot Quiz ---
+// --- Tool 4: Expanded Fake Payment Screenshot Quiz ---
 const paymentCases = [
   {
     app: 'PayQuick UPI',
@@ -351,7 +475,7 @@ const paymentCases = [
     upi: 'customer@okaxis',
     time: 'Today, 25:61 PM',
     isFake: true,
-    reason: 'Look at the timestamp ("25:61 PM") and placeholder transaction ID ("TXN_000000000")—clear signs of a forged screenshot.'
+    reason: 'Impossible timestamp ("25:61 PM") and placeholder transaction ID ("TXN_000000000") prove this receipt was edited.'
   },
   {
     app: 'PayQuick UPI',
@@ -361,7 +485,37 @@ const paymentCases = [
     upi: 'shopkeeper@sbi',
     time: '24 Nov, 04:15 PM',
     isFake: false,
-    reason: 'The formatting, 12-digit UTR/Transaction ID, and timestamp are consistent—though you should always still check your own bank SMS.'
+    reason: 'Valid 12-digit UTR number and realistic timestamp—though you should always still confirm the credit in your own bank app.'
+  },
+  {
+    app: 'BharatPay Wallet',
+    amount: '₹12,000.00',
+    status: 'PAYMENT CREDITED ✅✅',
+    txnId: '12345',
+    upi: 'merchant-store@ybl',
+    time: '32 Nov 2026, 11:10 AM',
+    isFake: true,
+    reason: 'Notice the non-existent date ("32 Nov"), 5-digit fake Txn ID ("12345"), and informal double-check emojis.'
+  },
+  {
+    app: 'InstaBank IMPS',
+    amount: '₹3,200.00',
+    status: 'Settled',
+    txnId: '632910485721',
+    upi: 'traders.blr@icici',
+    time: '25 Nov 2026, 02:42 PM',
+    isFake: false,
+    reason: 'Consistent 12-digit reference ID, clean typography, and valid timestamp.'
+  },
+  {
+    app: 'G-Transfer UPI',
+    amount: '₹1,499.00',
+    status: 'Processing... (Money Will Arrive in 24 Hrs)',
+    txnId: 'PENDING_9988',
+    upi: 'buyer99@oksbi',
+    time: '25 Nov 2026, 06:18 PM',
+    isFake: true,
+    reason: 'Scammers use fake "Processing" screens to trick sellers into handing over goods before any money actually leaves their account.'
   }
 ];
 
@@ -371,6 +525,7 @@ function renderPaymentQuiz() {
   const container = document.getElementById('paymentContainer');
   const p = paymentCases[payIdx % paymentCases.length];
   container.innerHTML = `
+    <div style="text-align:center;color:#94a3b8;font-size:0.88rem;">Receipt ${(payIdx % paymentCases.length) + 1} of ${paymentCases.length}</div>
     <div class="receipt-box">
       <div class="receipt-header"><strong>${p.app}</strong><div style="color:#16a34a;font-weight:700;">${p.status}</div></div>
       <div class="receipt-row"><span>Amount:</span><strong>${p.amount}</strong></div>
@@ -379,8 +534,8 @@ function renderPaymentQuiz() {
       <div class="receipt-row"><span>Time:</span><span>${p.time}</span></div>
     </div>
     <div style="display:flex;gap:1rem;justify-content:center;">
-      <button class="btn-primary" onclick="checkPayment(false)">Genuine</button>
-      <button class="btn-secondary" onclick="checkPayment(true)">Fake Screenshot</button>
+      <button class="btn-primary" onclick="checkPayment(false)">✅ Genuine</button>
+      <button class="btn-secondary" onclick="checkPayment(true)">🚨 Fake Screenshot</button>
     </div>
     <div id="payFeedback" class="result-box hidden"></div>`;
 }
@@ -392,7 +547,7 @@ function checkPayment(userSaidFake) {
   fb.classList.remove('hidden', 'safe', 'danger');
   fb.classList.add(correct ? 'safe' : 'danger');
   fb.innerHTML = `<strong>${correct ? '✅ Correct!' : '❌ Incorrect!'}</strong><p>${p.reason}</p>
-    <button class="btn-secondary" style="margin-top:0.75rem;" onclick="payIdx++;renderPaymentQuiz();">Next Receipt</button>`;
+    <button class="btn-secondary" style="margin-top:0.75rem;" onclick="payIdx++;renderPaymentQuiz();">Next Receipt →</button>`;
 }
 
 // --- Tool 5: Interactive Simulator ---
@@ -437,13 +592,18 @@ function checkSim(reported) {
     <button class="btn-secondary" style="margin-top:0.75rem;" onclick="simIdx++;renderSimulator();">Next Message</button>`;
 }
 
-// --- Tool 6: Privacy & Security Checkup ---
+// --- Tool 6: Expanded Privacy & Security Checkup (10 Items) ---
 const checkupItems = [
-  'I use unique passwords for every important account.',
-  'Two-Factor Authentication (2FA) is enabled on my email and bank.',
+  'I use unique passwords for every important email, banking, and social account.',
+  'Two-Factor Authentication (2FA) is enabled on my email, WhatsApp, and bank apps.',
   'My phone and laptop OS are updated to the latest security patches.',
-  'I never share OTPs or UPI PINs with anyone over call or chat.',
-  'I check URLs for HTTPS and exact spelling before logging in.'
+  'I never share OTPs, CVV numbers, or UPI PINs with anyone over call or chat.',
+  'I check URLs for HTTPS and exact domain spelling before logging in.',
+  'I never install remote screen-sharing apps (AnyDesk, TeamViewer) for strangers.',
+  'I verify UPI payment credits inside my own bank app rather than trusting screenshots.',
+  'I only download apps from official Google Play Store / Apple App Store (no unknown APK files).',
+  'My social media profiles have privacy locks enabled to prevent photo/identity cloning.',
+  'I have saved the National Cybercrime Helpline (1930) in my emergency contacts.'
 ];
 
 function renderCheckup() {
@@ -459,11 +619,12 @@ function renderCheckup() {
 function updateHygiene() {
   const cbs = document.querySelectorAll('.hygiene-cb');
   const checked = Array.from(cbs).filter(c => c.checked).length;
+  document.getElementById('hygieneCount').textContent = `${checked} / ${cbs.length}`;
   document.getElementById('hygieneScore').textContent = `${Math.round((checked / cbs.length) * 100)}%`;
 }
 
 // --- Initialize ---
-updateDashboard();
+checkAuthState();
 renderQuiz();
 renderScenario();
 renderPaymentQuiz();
