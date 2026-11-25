@@ -49,7 +49,7 @@
   <!-- =========================================================
        MAIN APP (Shown After Login)
        ========================================================= -->
-  <div id="appShell" class="hidden">
+  <div id="appShell" class="app-shell hidden">
     <!-- Top Navbar: Home, Dashboard, Report Crime, Feedback + Profile on Far Right -->
     <header class="navbar">
       <div class="nav-brand" onclick="switchSection('home')">
@@ -61,7 +61,7 @@
         <button class="nav-btn active" data-section="home" onclick="switchSection('home')">Home</button>
         <button class="nav-btn" data-section="dashboard" onclick="switchSection('dashboard')">Dashboard</button>
         <button class="nav-btn alert-nav" data-section="report-crime" onclick="switchSection('report-crime')">🚨 Report Crime</button>
-        <button class="nav-btn" onclick="goToFeedback()">Feedback</button>
+        <button class="nav-btn" data-section="feedback" onclick="switchSection('feedback')">Feedback</button>
       </nav>
 
       <!-- Far Right Corner Profile -->
@@ -83,254 +83,317 @@
       </div>
     </header>
 
-    <!-- =========================================================
-         VIEW 1: SCROLLABLE HOME PAGE
-         ========================================================= -->
-    <div id="home" class="view active">
-      <section class="hero-section">
-        <div class="hero-inner">
-          <span class="pill-tag">24/7 Citizen Cyber Defense & Awareness</span>
-          <h1>Stay Protected Online with <span class="highlight">CyberShield</span></h1>
-          <p id="welcomeText">Test suspicious links, spot fake payment screenshots, complete 3-stage assessments, and get instant victim reporting assistance.</p>
-          <div class="hero-actions">
-            <button class="btn-primary" onclick="switchSection('dashboard')">Open Security Dashboard</button>
-            <button class="btn-danger" onclick="switchSection('report-crime')">🚨 Victim? Report Crime Now</button>
-          </div>
-        </div>
-      </section>
-
-      <!-- Scrollable Feature Overview -->
-      <section class="home-block container">
-        <h2 class="section-heading">What You Can Do on CyberShield</h2>
-        <p class="section-sub">Interactive modules built to help students, families, and everyday users detect online fraud before losing money.</p>
-        <div class="quick-grid">
-          <div class="feature-card" onclick="openModule('link-checker')">
-            <h3>🔗 Suspicious Link Checker</h3>
-            <p>Paste any URL or test built-in examples to scan for phishing patterns and fake domains.</p>
-          </div>
-          <div class="feature-card" onclick="openModule('quiz')">
-            <h3>📝 3-Stage Assessments</h3>
-            <p>Take Pre-Assessment, Mid-Assessment, and Post-Assessment quizzes to measure growth.</p>
-          </div>
-          <div class="feature-card" onclick="openModule('payment-quiz')">
-            <h3>💳 Fake Payment Quiz</h3>
-            <p>Inspect UPI receipts and spot forged timestamps or fake transaction IDs.</p>
-          </div>
-          <div class="feature-card" onclick="switchSection('report-crime')">
-            <h3>🚨 Emergency Victim Desk</h3>
-            <p>Direct 1930 helpline dialer and official government portal filing guide.</p>
-          </div>
-        </div>
-      </section>
-
-      <!-- Scrollable Our Privacy Section -->
-      <section id="privacySection" class="home-block privacy-band">
-        <div class="container">
-          <h2 class="section-heading">🔒 Our Privacy & Zero-Tracking Promise</h2>
-          <p class="section-sub">Your safety starts with respecting your data.</p>
-          <div class="privacy-grid">
-            <div class="privacy-card">
-              <h4>1. Local-First Storage</h4>
-              <p>Your profile, quiz scores, and link checks stay directly inside your browser. We never sell or harvest your personal browsing history.</p>
-            </div>
-            <div class="privacy-card">
-              <h4>2. No Sensitive Credentials</h4>
-              <p>CyberShield will never ask for your bank account number, UPI PIN, Aadhaar number, or OTPs during training or simulations.</p>
-            </div>
-            <div class="privacy-card">
-              <h4>3. Direct Government Routing</h4>
-              <p>When you report a cybercrime, we connect you straight to official Indian government channels (1930 & cybercrime.gov.in) with zero middlemen.</p>
+    <main class="main-content">
+      <!-- =========================================================
+           VIEW 1: SCROLLABLE HOME PAGE
+           ========================================================= -->
+      <div id="home" class="view active">
+        <section class="hero-section">
+          <div class="hero-inner">
+            <span class="pill-tag">24/7 Citizen Cyber Defense & Awareness</span>
+            <h1>Stay Protected Online with <span class="highlight">CyberShield</span></h1>
+            <p id="welcomeText">Test suspicious links, spot fake payment screenshots, bust cybersecurity myths, and get instant victim reporting assistance.</p>
+            <div class="hero-actions">
+              <button class="btn-primary" onclick="switchSection('dashboard')">Open Security Dashboard</button>
+              <button class="btn-danger" onclick="switchSection('report-crime')">🚨 Victim? Report Crime Now</button>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <!-- Scrollable Feedback Submission Section -->
-      <section id="feedbackSection" class="home-block container">
+        <!-- Scrollable Feature Overview -->
+        <section class="home-block container">
+          <h2 class="section-heading">What You Can Do on CyberShield</h2>
+          <p class="section-sub">Interactive modules built to help students, families, and everyday users detect online fraud before losing money.</p>
+          <div class="quick-grid">
+            <div class="feature-card" onclick="openModule('link-checker')">
+              <h3>🔗 Suspicious Link Checker</h3>
+              <p>Paste any URL or test built-in examples to scan for phishing patterns and fake domains.</p>
+            </div>
+            <div class="feature-card" onclick="openModule('quiz')">
+              <h3>📝 3-Stage Assessments</h3>
+              <p>Take Pre-Assessment, Assessment, and Post-Assessment quizzes to measure growth.</p>
+            </div>
+            <div class="feature-card" onclick="openModule('payment-quiz')">
+              <h3>💳 Fake Payment Quiz</h3>
+              <p>Inspect UPI receipts and spot forged timestamps or fake transaction IDs.</p>
+            </div>
+            <div class="feature-card" onclick="switchSection('report-crime')">
+              <h3>🚨 Emergency Victim Desk</h3>
+              <p>Direct 1930 helpline dialer and official government portal filing guide.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Scrollable Myths vs. Facts & Real Cyber Stories Section -->
+        <section id="mythsStoriesSection" class="home-block myths-band">
+          <div class="container">
+            <h2 class="section-heading">💡 Cybersecurity Myths vs. Facts</h2>
+            <p class="section-sub">Common misconceptions that scammers rely on—and the real facts that keep you safe.</p>
+            <div class="myths-grid" id="mythsGrid"></div>
+
+            <h2 class="section-heading" style="margin-top: 3.5rem;">📖 Real-World Cybercrime Case Stories</h2>
+            <p class="section-sub">Learn from real incidents across India so you never fall into the same trap.</p>
+            <div class="stories-grid" id="storiesGrid"></div>
+          </div>
+        </section>
+
+        <!-- Scrollable Our Privacy Section -->
+        <section id="privacySection" class="home-block privacy-band">
+          <div class="container">
+            <h2 class="section-heading">🔒 Our Privacy & Zero-Tracking Promise</h2>
+            <p class="section-sub">Your safety starts with respecting your data.</p>
+            <div class="privacy-grid">
+              <div class="privacy-card">
+                <h4>1. Local-First Storage</h4>
+                <p>Your profile, quiz scores, and link checks stay directly inside your browser. We never sell or harvest your personal browsing history.</p>
+              </div>
+              <div class="privacy-card">
+                <h4>2. No Sensitive Credentials</h4>
+                <p>CyberShield will never ask for your bank account number, UPI PIN, Aadhaar number, or OTPs during training or simulations.</p>
+              </div>
+              <div class="privacy-card">
+                <h4>3. Direct Government Routing</h4>
+                <p>When you report a cybercrime, we connect you straight to official Indian government channels (1930 & cybercrime.gov.in) with zero middlemen.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- =========================================================
+           VIEW 2: INTERACTIVE TOOLS DASHBOARD
+           ========================================================= -->
+      <div id="dashboard" class="view container">
+        <div class="dash-header">
+          <h2>📊 CyberShield Training & Tools Dashboard</h2>
+          <p class="subtitle">Track your readiness score and use all 6 interactive protection tools.</p>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h3>Readiness Score</h3>
+            <p class="stat-value" id="statScore">0%</p>
+          </div>
+          <div class="stat-card">
+            <h3>Links Checked</h3>
+            <p class="stat-value" id="statLinks">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Assessments Done</h3>
+            <p class="stat-value" id="statQuizzes">0</p>
+          </div>
+          <div class="stat-card">
+            <h3>Scenarios Solved</h3>
+            <p class="stat-value" id="statScenarios">0</p>
+          </div>
+        </div>
+
+        <!-- Tool Switcher Pills -->
+        <div class="tool-tabs">
+          <button class="tool-btn active" data-tool="link-checker">🔗 Link Checker</button>
+          <button class="tool-btn" data-tool="quiz">📝 Assessments (Pre / Mid / Post)</button>
+          <button class="tool-btn" data-tool="scenarios">🎭 Scam Scenarios</button>
+          <button class="tool-btn" data-tool="payment-quiz">💳 Fake Payment Quiz</button>
+          <button class="tool-btn" data-tool="simulator">📱 Simulator</button>
+          <button class="tool-btn" data-tool="checkup">🔒 Security Checkup</button>
+        </div>
+
+        <!-- Tool 1: Link Checker with Example URLs -->
+        <div id="link-checker" class="tool-panel active card">
+          <h3>🔗 Suspicious Link Checker</h3>
+          <p class="subtitle">Paste any URL below or click one of the example URLs to test how phishing detection works.</p>
+          <div class="input-group">
+            <input type="text" id="urlInput" placeholder="e.g. http://verify-bank-login.xyz/account" />
+            <button class="btn-primary" id="checkUrlBtn">Analyze URL</button>
+          </div>
+
+          <div class="example-urls-box">
+            <span class="example-label">Try example URLs (click to test):</span>
+            <div class="example-chips">
+              <button type="button" class="example-chip danger-chip" onclick="testExampleUrl('http://sbi-kyc-update-alert.xyz/login')">🚨 http://sbi-kyc-update-alert.xyz/login</button>
+              <button type="button" class="example-chip warn-chip" onclick="testExampleUrl('http://192.168.1.45/free-gift-claim')">⚠️ http://192.168.1.45/free-gift-claim</button>
+              <button type="button" class="example-chip danger-chip" onclick="testExampleUrl('https://secure-paypal.com@evil-site.tk/verify')">🚨 https://secure-paypal.com@evil-site.tk/verify</button>
+              <button type="button" class="example-chip safe-chip" onclick="testExampleUrl('https://cybercrime.gov.in')">✅ https://cybercrime.gov.in</button>
+              <button type="button" class="example-chip safe-chip" onclick="testExampleUrl('https://www.rbi.org.in')">✅ https://www.rbi.org.in</button>
+            </div>
+          </div>
+
+          <div id="urlResult" class="result-box hidden"></div>
+        </div>
+
+        <!-- Tool 2: 3-Stage Assessments (Pre, Assessment, Post) -->
+        <div id="quiz" class="tool-panel card">
+          <h3>📝 Cybersecurity Assessments</h3>
+          <p class="subtitle">Choose an assessment stage below to test your knowledge before, during, and after training.</p>
+          <div class="stage-tabs">
+            <button class="stage-btn active" data-stage="pre" onclick="selectAssessmentStage('pre')">1. Pre-Assessment</button>
+            <button class="stage-btn" data-stage="mid" onclick="selectAssessmentStage('mid')">2. Assessment</button>
+            <button class="stage-btn" data-stage="post" onclick="selectAssessmentStage('post')">3. Post-Assessment</button>
+          </div>
+          <div id="quizContainer"></div>
+        </div>
+
+        <!-- Tool 3: Scam Scenarios -->
+        <div id="scenarios" class="tool-panel card">
+          <h3>🎭 Scam Scenario Module</h3>
+          <div id="scenarioContainer"></div>
+        </div>
+
+        <!-- Tool 4: Fake Payment Quiz -->
+        <div id="payment-quiz" class="tool-panel card">
+          <h3>💳 Fake Payment Screenshot Quiz</h3>
+          <div id="paymentContainer"></div>
+        </div>
+
+        <!-- Tool 5: Simulator -->
+        <div id="simulator" class="tool-panel card">
+          <h3>📱 Interactive Phishing Simulator</h3>
+          <div id="simulatorContainer"></div>
+        </div>
+
+        <!-- Tool 6: Expanded Privacy & Security Checkup -->
+        <div id="checkup" class="tool-panel card">
+          <h3>🔒 Personal Security & Privacy Hygiene Checkup</h3>
+          <p class="subtitle">Tick all the security practices you actively follow to calculate your protection score.</p>
+          <div id="checkupList" class="checklist"></div>
+          <div class="checkup-footer">
+            <span>Completed: <strong id="hygieneCount">0 / 10</strong> &nbsp;|&nbsp; Hygiene Score: <strong id="hygieneScore">0%</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           VIEW 3: DEDICATED VICTIM / CRIME REPORTING DASHBOARD
+           ========================================================= -->
+      <div id="report-crime" class="view container">
+        <div class="victim-banner">
+          <span class="urgent-badge">⏱️ GOLDEN HOUR RESPONSE — ACT IMMEDIATELY</span>
+          <h2>🚨 Cybercrime Victim Assistance & Reporting Dashboard</h2>
+          <p>If you have lost money to UPI fraud, phishing, fake apps, or online extortion, report within the first <strong>2 hours</strong> to freeze the scammer's bank account.</p>
+        </div>
+
+        <div class="report-options-grid">
+          <div class="report-card call-card">
+            <div class="report-icon">📞</div>
+            <h3>Option 1: Call National Cyber Helpline</h3>
+            <div class="helpline-number">1930</div>
+            <p>Available <strong>24x7</strong> across India (operated by I4C / Ministry of Home Affairs). Calling 1930 immediately triggers a financial freeze request on the fraudster's account.</p>
+            <div class="report-actions">
+              <a href="tel:1930" class="btn-danger btn-full">📞 Dial 1930 Now</a>
+              <button class="btn-secondary btn-full" onclick="copyHelpline()">📋 Copy Number (1930)</button>
+            </div>
+            <p id="copyNotice" class="copy-notice hidden">✅ Copied 1930 to clipboard!</p>
+          </div>
+
+          <div class="report-card portal-card">
+            <div class="report-icon">🏛️</div>
+            <h3>Option 2: Report on Official Govt. Portal</h3>
+            <div class="portal-domain">cybercrime.gov.in</div>
+            <p>File an official online complaint with the <strong>National Cyber Crime Reporting Portal</strong> for financial fraud, social media hacking, or cyberbullying.</p>
+            <div class="report-actions">
+              <a href="https://cybercrime.gov.in/" target="_blank" rel="noopener noreferrer" class="btn-primary btn-full">🌐 Open Official Govt. Website ↗</a>
+              <button class="btn-secondary btn-full" onclick="toggleChecklist()">📝 View Required Documents</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card victim-prep-card" id="victimPrepBox">
+          <h3>📋 Keep These Ready Before Calling 1930 or Filing Online</h3>
+          <div class="prep-grid">
+            <div class="prep-item">
+              <strong>1. Transaction Details</strong>
+              <span>12-digit UTR / Reference Number, exact amount lost, date, and time of transaction.</span>
+            </div>
+            <div class="prep-item">
+              <strong>2. Account Information</strong>
+              <span>Your bank name/account number and the scammer's UPI ID, phone number, or website link.</span>
+            </div>
+            <div class="prep-item">
+              <strong>3. Screenshots & Proof</strong>
+              <span>Screenshots of the payment receipt, WhatsApp/SMS chat, and call logs (do not delete anything).</span>
+            </div>
+            <div class="prep-item">
+              <strong>4. Freeze Your Card/UPI</strong>
+              <span>Immediately call your bank's customer care to block compromised cards or net banking.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- =========================================================
+           VIEW 4: SEPARATE DEDICATED FEEDBACK PAGE
+           ========================================================= -->
+      <div id="feedback" class="view container">
+        <div class="feedback-page-header">
+          <span class="pill-tag">Community Input & Scam Intelligence</span>
+          <h2>💬 CyberShield Citizen Feedback & Scam Reporting</h2>
+          <p class="subtitle">Share your experience, suggest new training modules, or submit suspicious scam messages to help protect others.</p>
+        </div>
+
         <div class="feedback-wrapper">
-          <h2 class="section-heading">💬 Share Your Feedback</h2>
-          <p class="section-sub">Help us improve CyberShield or suggest a new scam scenario to add.</p>
           <form id="feedbackForm" class="feedback-form">
             <div class="feedback-row">
-              <input type="text" id="fbName" placeholder="Your Name" required />
-              <input type="email" id="fbEmail" placeholder="Your Email (optional)" />
+              <div class="form-group">
+                <label for="fbName">Your Name *</label>
+                <input type="text" id="fbName" placeholder="Enter your full name" required />
+              </div>
+              <div class="form-group">
+                <label for="fbEmail">Email Address (Optional)</label>
+                <input type="email" id="fbEmail" placeholder="you@example.com" />
+              </div>
             </div>
-            <select id="fbCategory">
-              <option value="General Feedback">General Feedback</option>
-              <option value="Report a New Scam Pattern">Report a New Scam Pattern</option>
-              <option value="UI / Feature Suggestion">UI / Feature Suggestion</option>
-            </select>
-            <textarea id="fbMessage" rows="4" placeholder="Write your feedback or describe a scam you encountered..." required></textarea>
+
+            <div class="feedback-row">
+              <div class="form-group">
+                <label for="fbCategory">Feedback Topic / Category *</label>
+                <select id="fbCategory" required>
+                  <option value="General Feedback">General Feedback</option>
+                  <option value="Report a New Scam Pattern">Report a New Scam Pattern</option>
+                  <option value="UPI / Banking Fraud Alert">UPI / Banking Fraud Alert</option>
+                  <option value="Suspicious Phishing Link Submission">Suspicious Phishing Link Submission</option>
+                  <option value="UI / Feature Suggestion">UI / Feature Suggestion</option>
+                  <option value="Assessment / Quiz Feedback">Assessment / Quiz Feedback</option>
+                  <option value="Victim Helpline (1930) Experience">Victim Helpline (1930) Experience</option>
+                  <option value="Bug / Technical Issue">Bug / Technical Issue</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="fbRating">Overall Platform Experience *</label>
+                <select id="fbRating" required>
+                  <option value="5 - Excellent & Very Helpful">⭐⭐⭐⭐⭐ Excellent & Very Helpful</option>
+                  <option value="4 - Good & Easy to Use">⭐⭐⭐⭐ Good & Easy to Use</option>
+                  <option value="3 - Average">⭐⭐⭐ Average</option>
+                  <option value="2 - Needs Improvement">⭐⭐ Needs Improvement</option>
+                  <option value="1 - Facing Issues">⭐ Facing Issues</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="fbMessage">Detailed Message *</label>
+              <textarea id="fbMessage" rows="5" placeholder="Describe your feedback, feature request, or the scam message/link you encountered..." required></textarea>
+            </div>
+
             <button type="submit" class="btn-primary">Submit Feedback</button>
             <p id="fbStatus" class="feedback-status hidden"></p>
           </form>
-        </div>
-      </section>
 
-      <footer class="footer">
-        <p>CyberShield — Community Cybersecurity Awareness & Victim Support Platform | Emergency Helpline: <strong>1930</strong></p>
-      </footer>
-    </div>
+          <!-- Recent Feedback History -->
+          <div id="recentFeedbackBox" class="recent-fb-box hidden">
+            <h4>🗂️ Your Submitted Feedback</h4>
+            <div id="recentFeedbackList"></div>
+          </div>
+        </div>
+      </div>
+    </main>
 
     <!-- =========================================================
-         VIEW 2: INTERACTIVE TOOLS DASHBOARD
+         GLOBAL FOOTER ON EVERY PAGE/VIEW
          ========================================================= -->
-    <div id="dashboard" class="view container">
-      <div class="dash-header">
-        <h2>📊 CyberShield Training & Tools Dashboard</h2>
-        <p class="subtitle">Track your readiness score and use all 6 interactive protection tools.</p>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3>Readiness Score</h3>
-          <p class="stat-value" id="statScore">0%</p>
-        </div>
-        <div class="stat-card">
-          <h3>Links Checked</h3>
-          <p class="stat-value" id="statLinks">0</p>
-        </div>
-        <div class="stat-card">
-          <h3>Assessments Done</h3>
-          <p class="stat-value" id="statQuizzes">0</p>
-        </div>
-        <div class="stat-card">
-          <h3>Scenarios Solved</h3>
-          <p class="stat-value" id="statScenarios">0</p>
-        </div>
-      </div>
-
-      <!-- Tool Switcher Pills -->
-      <div class="tool-tabs">
-        <button class="tool-btn active" data-tool="link-checker">🔗 Link Checker</button>
-        <button class="tool-btn" data-tool="quiz">📝 Assessments (Pre / Mid / Post)</button>
-        <button class="tool-btn" data-tool="scenarios">🎭 Scam Scenarios</button>
-        <button class="tool-btn" data-tool="payment-quiz">💳 Fake Payment Quiz</button>
-        <button class="tool-btn" data-tool="simulator">📱 Simulator</button>
-        <button class="tool-btn" data-tool="checkup">🔒 Security Checkup</button>
-      </div>
-
-      <!-- Tool 1: Link Checker with Example URLs -->
-      <div id="link-checker" class="tool-panel active card">
-        <h3>🔗 Suspicious Link Checker</h3>
-        <p class="subtitle">Paste any URL below or click one of the example URLs to test how phishing detection works.</p>
-        <div class="input-group">
-          <input type="text" id="urlInput" placeholder="e.g. http://verify-bank-login.xyz/account" />
-          <button class="btn-primary" id="checkUrlBtn">Analyze URL</button>
-        </div>
-
-        <div class="example-urls-box">
-          <span class="example-label">Try example URLs (click to test):</span>
-          <div class="example-chips">
-            <button type="button" class="example-chip danger-chip" onclick="testExampleUrl('http://sbi-kyc-update-alert.xyz/login')">🚨 http://sbi-kyc-update-alert.xyz/login</button>
-            <button type="button" class="example-chip warn-chip" onclick="testExampleUrl('http://192.168.1.45/free-gift-claim')">⚠️ http://192.168.1.45/free-gift-claim</button>
-            <button type="button" class="example-chip danger-chip" onclick="testExampleUrl('https://secure-paypal.com@evil-site.tk/verify')">🚨 https://secure-paypal.com@evil-site.tk/verify</button>
-            <button type="button" class="example-chip safe-chip" onclick="testExampleUrl('https://cybercrime.gov.in')">✅ https://cybercrime.gov.in</button>
-            <button type="button" class="example-chip safe-chip" onclick="testExampleUrl('https://www.rbi.org.in')">✅ https://www.rbi.org.in</button>
-          </div>
-        </div>
-
-        <div id="urlResult" class="result-box hidden"></div>
-      </div>
-
-      <!-- Tool 2: 3-Stage Assessments (Pre, Assessment, Post) -->
-      <div id="quiz" class="tool-panel card">
-        <h3>📝 Cybersecurity Assessments</h3>
-        <p class="subtitle">Choose an assessment stage below to test your knowledge before, during, and after training.</p>
-        <div class="stage-tabs">
-          <button class="stage-btn active" data-stage="pre" onclick="selectAssessmentStage('pre')">1. Pre-Assessment</button>
-          <button class="stage-btn" data-stage="mid" onclick="selectAssessmentStage('mid')">2. Assessment</button>
-          <button class="stage-btn" data-stage="post" onclick="selectAssessmentStage('post')">3. Post-Assessment</button>
-        </div>
-        <div id="quizContainer"></div>
-      </div>
-
-      <!-- Tool 3: Scam Scenarios -->
-      <div id="scenarios" class="tool-panel card">
-        <h3>🎭 Scam Scenario Module</h3>
-        <div id="scenarioContainer"></div>
-      </div>
-
-      <!-- Tool 4: Fake Payment Quiz -->
-      <div id="payment-quiz" class="tool-panel card">
-        <h3>💳 Fake Payment Screenshot Quiz</h3>
-        <div id="paymentContainer"></div>
-      </div>
-
-      <!-- Tool 5: Simulator -->
-      <div id="simulator" class="tool-panel card">
-        <h3>📱 Interactive Phishing Simulator</h3>
-        <div id="simulatorContainer"></div>
-      </div>
-
-      <!-- Tool 6: Expanded Privacy & Security Checkup -->
-      <div id="checkup" class="tool-panel card">
-        <h3>🔒 Personal Security & Privacy Hygiene Checkup</h3>
-        <p class="subtitle">Tick all the security practices you actively follow to calculate your protection score.</p>
-        <div id="checkupList" class="checklist"></div>
-        <div class="checkup-footer">
-          <span>Completed: <strong id="hygieneCount">0 / 10</strong> &nbsp;|&nbsp; Hygiene Score: <strong id="hygieneScore">0%</strong></span>
-        </div>
-      </div>
-    </div>
-
-    <!-- =========================================================
-         VIEW 3: DEDICATED VICTIM / CRIME REPORTING DASHBOARD
-         ========================================================= -->
-    <div id="report-crime" class="view container">
-      <div class="victim-banner">
-        <span class="urgent-badge">⏱️ GOLDEN HOUR RESPONSE — ACT IMMEDIATELY</span>
-        <h2>🚨 Cybercrime Victim Assistance & Reporting Dashboard</h2>
-        <p>If you have lost money to UPI fraud, phishing, fake apps, or online extortion, report within the first <strong>2 hours</strong> to freeze the scammer's bank account.</p>
-      </div>
-
-      <div class="report-options-grid">
-        <div class="report-card call-card">
-          <div class="report-icon">📞</div>
-          <h3>Option 1: Call National Cyber Helpline</h3>
-          <div class="helpline-number">1930</div>
-          <p>Available <strong>24x7</strong> across India (operated by I4C / Ministry of Home Affairs). Calling 1930 immediately triggers a financial freeze request on the fraudster's account.</p>
-          <div class="report-actions">
-            <a href="tel:1930" class="btn-danger btn-full">📞 Dial 1930 Now</a>
-            <button class="btn-secondary btn-full" onclick="copyHelpline()">📋 Copy Number (1930)</button>
-          </div>
-          <p id="copyNotice" class="copy-notice hidden">✅ Copied 1930 to clipboard!</p>
-        </div>
-
-        <div class="report-card portal-card">
-          <div class="report-icon">🏛️</div>
-          <h3>Option 2: Report on Official Govt. Portal</h3>
-          <div class="portal-domain">cybercrime.gov.in</div>
-          <p>File an official online complaint with the <strong>National Cyber Crime Reporting Portal</strong> for financial fraud, social media hacking, or cyberbullying.</p>
-          <div class="report-actions">
-            <a href="https://cybercrime.gov.in/" target="_blank" rel="noopener noreferrer" class="btn-primary btn-full">🌐 Open Official Govt. Website ↗</a>
-            <button class="btn-secondary btn-full" onclick="toggleChecklist()">📝 View Required Documents</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="card victim-prep-card" id="victimPrepBox">
-        <h3>📋 Keep These Ready Before Calling 1930 or Filing Online</h3>
-        <div class="prep-grid">
-          <div class="prep-item">
-            <strong>1. Transaction Details</strong>
-            <span>12-digit UTR / Reference Number, exact amount lost, date, and time of transaction.</span>
-          </div>
-          <div class="prep-item">
-            <strong>2. Account Information</strong>
-            <span>Your bank name/account number and the scammer's UPI ID, phone number, or website link.</span>
-          </div>
-          <div class="prep-item">
-            <strong>3. Screenshots & Proof</strong>
-            <span>Screenshots of the payment receipt, WhatsApp/SMS chat, and call logs (do not delete anything).</span>
-          </div>
-          <div class="prep-item">
-            <strong>4. Freeze Your Card/UPI</strong>
-            <span>Immediately call your bank's customer care to block compromised cards or net banking.</span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <footer class="footer">
+      <p>CyberShield — Community Cybersecurity Awareness & Victim Support Platform | Emergency Helpline: <strong>1930</strong></p>
+    </footer>
   </div>
 
   <script src="script.js"></script>

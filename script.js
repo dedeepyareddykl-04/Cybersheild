@@ -138,14 +138,6 @@ function switchSection(viewId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function goToFeedback() {
-  switchSection('home');
-  setTimeout(() => {
-    const fb = document.getElementById('feedbackSection');
-    if (fb) fb.scrollIntoView({ behavior: 'smooth' });
-  }, 60);
-}
-
 function openModule(toolId) {
   switchSection('dashboard');
   switchTool(toolId);
@@ -184,25 +176,122 @@ function updateDashboard() {
     document.getElementById('dropFullName').textContent = currentUser.name;
     document.getElementById('dropEmail').textContent = currentUser.email;
     document.getElementById('welcomeText').textContent = `Welcome back, ${currentUser.name}! Your personal CyberShield safety workspace is active.`;
+    const fbNameInput = document.getElementById('fbName');
+    if (fbNameInput && !fbNameInput.value) fbNameInput.value = currentUser.name;
   }
 }
 
-// --- Feedback Form ---
+// --- Myths vs. Facts & Cybercrime Stories (Scrollable Home) ---
+const mythsAndFacts = [
+  {
+    myth: '“I need to enter my UPI PIN or scan a QR code to receive money.”',
+    fact: 'Entering a UPI PIN or scanning a QR code ONLY deducts money from your account—never to receive funds.'
+  },
+  {
+    myth: '“Only people with lots of money in their bank get targeted by hackers.”',
+    fact: 'Automated phishing SMS and fake job/parcel links target everyone indiscriminately—students are among the most targeted groups.'
+  },
+  {
+    myth: '“If a website has a padlock icon (HTTPS), it is 100% safe and genuine.”',
+    fact: 'HTTPS only encrypts traffic; scammers also register fake domains with free SSL certificates (e.g., https://bank-kyc-update.xyz).'
+  },
+  {
+    myth: '“Police or CBI officers conduct ‘Digital Arrests’ over WhatsApp/Skype video calls.”',
+    fact: 'Indian law enforcement NEVER conducts arrests or demands bail transfers over video calls. Hang up immediately and dial 1930.'
+  }
+];
+
+const cyberStories = [
+  {
+    tag: 'Case Study #1 • Fake Courier & Digital Arrest',
+    title: 'The Parcel With Illegal Items Call',
+    story: 'A Bengaluru engineering student received an IVR call claiming a FedEx parcel in her name contained illegal drugs. She was transferred to a fake “cyber officer” on Skype who demanded ₹45,000 for “account verification.”',
+    lesson: 'Takeaway: Courier companies and police never demand money over video calls to clear your name.'
+  },
+  {
+    tag: 'Case Study #2 • Marketplace QR Code Trap',
+    title: 'Selling a Used Study Table Online',
+    story: 'While selling furniture online, a buyer sent a QR code saying “Scan this to receive ₹3,500 advance.” The seller entered their UPI PIN and lost ₹3,500 instead of receiving it.',
+    lesson: 'Takeaway: Never scan a QR code or enter your UPI PIN when you are the one receiving payment.'
+  },
+  {
+    tag: 'Case Study #3 • Golden Hour 1930 Recovery',
+    title: 'How Reporting Within 40 Minutes Saved ₹28,000',
+    story: 'A victim clicked a fake electricity bill SMS link and lost ₹28,000. Instead of waiting until the next day, they called 1930 within 40 minutes with the 12-digit UTR number, freezing the funds before withdrawal.',
+    lesson: 'Takeaway: Dial 1930 immediately within the first 1–2 hours ("Golden Hour") to block fraudulent transfers.'
+  }
+];
+
+function renderMythsAndStories() {
+  const mythsGrid = document.getElementById('mythsGrid');
+  if (mythsGrid) {
+    mythsGrid.innerHTML = mythsAndFacts.map(item => `
+      <div class="myth-card">
+        <span class="myth-tag">❌ MYTH</span>
+        <p><strong>${item.myth}</strong></p>
+        <div class="fact-box">
+          <strong>✅ FACT</strong>
+          <span>${item.fact}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const storiesGrid = document.getElementById('storiesGrid');
+  if (storiesGrid) {
+    storiesGrid.innerHTML = cyberStories.map(s => `
+      <div class="story-card">
+        <span class="story-badge">${s.tag}</span>
+        <h4>${s.title}</h4>
+        <p>${s.story}</p>
+        <div class="story-lesson">🛡️ ${s.lesson}</div>
+      </div>
+    `).join('');
+  }
+}
+
+// --- Separate Feedback Page Logic ---
+function renderRecentFeedback() {
+  const allFeedback = JSON.parse(localStorage.getItem('cs_feedback')) || [];
+  const box = document.getElementById('recentFeedbackBox');
+  const list = document.getElementById('recentFeedbackList');
+  if (!box || !list) return;
+
+  if (allFeedback.length === 0) {
+    box.classList.add('hidden');
+    return;
+  }
+
+  box.classList.remove('hidden');
+  list.innerHTML = allFeedback.slice().reverse().map(item => `
+    <div class="fb-entry">
+      <div class="fb-entry-meta">
+        <span><strong>${item.category}</strong> • ${item.rating || ''}</span>
+        <span>${item.date}</span>
+      </div>
+      <p>${item.message}</p>
+    </div>
+  `).join('');
+}
+
 document.getElementById('feedbackForm').addEventListener('submit', (e) => {
   e.preventDefault();
   const name = document.getElementById('fbName').value.trim();
   const email = document.getElementById('fbEmail').value.trim();
   const category = document.getElementById('fbCategory').value;
+  const rating = document.getElementById('fbRating').value;
   const message = document.getElementById('fbMessage').value.trim();
 
   const allFeedback = JSON.parse(localStorage.getItem('cs_feedback')) || [];
-  allFeedback.push({ name, email, category, message, date: new Date().toLocaleString() });
+  allFeedback.push({ name, email, category, rating, message, date: new Date().toLocaleString() });
   localStorage.setItem('cs_feedback', JSON.stringify(allFeedback));
 
   const statusEl = document.getElementById('fbStatus');
-  statusEl.textContent = `✅ Thank you, ${name}! Your feedback has been submitted.`;
+  statusEl.textContent = `✅ Thank you, ${name}! Your "${category}" submission has been recorded.`;
   statusEl.classList.remove('hidden');
   document.getElementById('feedbackForm').reset();
+  if (currentUser) document.getElementById('fbName').value = currentUser.name;
+  renderRecentFeedback();
 });
 
 // --- Victim Crime Reporting Helpers ---
@@ -300,7 +389,7 @@ const assessmentBanks = {
     ]
   },
   mid: {
-    label: 'Mid-Assessment (Applied Scam Detection)',
+    label: 'Assessment (Applied Scam Detection)',
     questions: [
       {
         q: 'A link reads "https://sbi-kyc.verify-user.xyz". Which part is the actual domain you are connecting to?',
@@ -323,7 +412,7 @@ const assessmentBanks = {
         answer: 1
       },
       {
-        q: 'What is "Digital Arrest" scam?',
+        q: 'What is a "Digital Arrest" scam?',
         options: ['A real CBI arrest over WhatsApp video call', 'Fraudsters impersonating police/customs on video calls to extort money', 'An official court summons via SMS'],
         answer: 1
       }
@@ -625,6 +714,8 @@ function updateHygiene() {
 
 // --- Initialize ---
 checkAuthState();
+renderMythsAndStories();
+renderRecentFeedback();
 renderQuiz();
 renderScenario();
 renderPaymentQuiz();
