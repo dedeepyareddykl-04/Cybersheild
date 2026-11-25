@@ -19,16 +19,21 @@
         <button class="tab-btn" id="registerTabBtn">Create Profile</button>
       </div>
 
+      <!-- Login Form -->
       <form id="loginForm" class="auth-form">
         <h2>Welcome to CyberShield</h2>
-        <p class="baby-sub">Please sign in to access your Learning Modules, Dashboard, and Victim Reporting tools.</p>
+        <p class="baby-sub">Please sign in to access your Modules, Dashboard, and Victim Reporting tools.</p>
         <input type="email" id="loginEmail" placeholder="Email Address" required />
         <input type="password" id="loginPassword" placeholder="Password" required />
         <button type="submit" class="btn-baby-primary">Login to CyberShield</button>
-        <button type="button" class="btn-baby-ghost" id="demoQuickLoginBtn">⚡ Instant Demo Login (1-Click)</button>
+        <div class="auth-extra-row">
+          <button type="button" class="link-baby-btn" id="openForgotBtn">Forgot Password?</button>
+          <button type="button" class="link-baby-btn" id="demoQuickLoginBtn">⚡ Instant Demo Login</button>
+        </div>
         <p class="form-msg" id="loginMsg"></p>
       </form>
 
+      <!-- Register Form -->
       <form id="registerForm" class="auth-form hidden">
         <h2>Create Your Profile</h2>
         <p class="baby-sub">Quick setup—no sensitive bank details ever asked.</p>
@@ -43,6 +48,41 @@
         <button type="submit" class="btn-baby-primary">Create Profile & Enter</button>
         <p class="form-msg" id="regMsg"></p>
       </form>
+
+      <!-- Forgot Password Reset Form (On Login Gate) -->
+      <form id="forgotForm" class="auth-form hidden">
+        <h2>Reset Password</h2>
+        <p class="baby-sub">Verify your registered email to set a new password.</p>
+        <input type="email" id="forgotEmail" placeholder="Registered Email Address" required />
+        <div class="verify-row">
+          <input type="text" id="forgotCode" placeholder="6-digit Code" required />
+          <button type="button" class="btn-baby-sec" id="sendForgotCodeBtn">Get Code</button>
+        </div>
+        <p class="demo-code-banner hidden" id="forgotCodeBanner"></p>
+        <input type="password" id="forgotNewPassword" placeholder="New Password (min 6 chars)" minlength="6" required />
+        <button type="submit" class="btn-baby-primary">Update Password & Login</button>
+        <button type="button" class="link-baby-btn" id="backToLoginBtn">← Back to Login</button>
+        <p class="form-msg" id="forgotMsg"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       CHANGE PASSWORD MODAL (From Profile Dropdown)
+       ========================================================= -->
+  <div id="changePassModal" class="modal hidden">
+    <div class="modal-content baby-card">
+      <button type="button" class="close-modal" id="closeChangePassBtn">&times;</button>
+      <div class="baby-badge">🔑 Account Security</div>
+      <form id="changePassForm" class="auth-form">
+        <h2>Change Password</h2>
+        <p class="baby-sub">Update your CyberShield account password.</p>
+        <input type="password" id="oldPasswordInput" placeholder="Current Password" required />
+        <input type="password" id="newPasswordInput" placeholder="New Password (min 6 chars)" minlength="6" required />
+        <input type="password" id="confirmNewPasswordInput" placeholder="Confirm New Password" minlength="6" required />
+        <button type="submit" class="btn-baby-primary">Save New Password</button>
+        <p class="form-msg" id="changePassMsg"></p>
+      </form>
     </div>
   </div>
 
@@ -50,7 +90,7 @@
        MAIN APP (Shown After Login)
        ========================================================= -->
   <div id="appShell" class="app-shell hidden">
-    <!-- Top Navbar: Home, Modules (8 Chapters), Dashboard, Report Crime, Feedback + Profile on Far Right -->
+    <!-- Top Navbar: Home, Modules, Dashboard, Report Crime, Feedback + Profile on Far Right -->
     <header class="navbar">
       <div class="nav-brand" onclick="switchSection('home')">
         <span class="shield-icon">🛡️</span>
@@ -59,7 +99,7 @@
 
       <nav class="nav-links" id="navLinks">
         <button class="nav-btn active" data-section="home" onclick="switchSection('home')">Home</button>
-        <button class="nav-btn" data-section="modules" onclick="switchSection('modules')">📚 Modules (8)</button>
+        <button class="nav-btn" data-section="modules" onclick="switchSection('modules')">📚 Modules</button>
         <button class="nav-btn" data-section="dashboard" onclick="switchSection('dashboard')">Dashboard</button>
         <button class="nav-btn alert-nav" data-section="report-crime" onclick="switchSection('report-crime')">🚨 Report Crime</button>
         <button class="nav-btn" data-section="feedback" onclick="switchSection('feedback')">Feedback</button>
@@ -78,8 +118,8 @@
             <small id="dropEmail">user@example.com</small>
           </div>
           <hr />
-          <button class="dropdown-item" onclick="switchSection('modules'); closeProfileMenu();">📚 8 Learning Chapters</button>
-          <button class="dropdown-item" onclick="switchSection('dashboard'); closeProfileMenu();">📊 Tools & Assessments</button>
+          <button class="dropdown-item" onclick="switchSection('dashboard'); closeProfileMenu();">📊 My Progress</button>
+          <button class="dropdown-item" onclick="openChangePasswordModal();">🔑 Change Password</button>
           <button class="dropdown-item logout-item" onclick="logout()">🚪 Logout</button>
         </div>
       </div>
@@ -94,9 +134,9 @@
           <div class="hero-inner">
             <span class="pill-tag">24/7 Citizen Cyber Defense & Awareness</span>
             <h1>Stay Protected Online with <span class="highlight">CyberShield</span></h1>
-            <p id="welcomeText">Complete 8 chapter-wise cybersecurity lessons, test suspicious links, take 3-stage assessments, and get instant victim reporting assistance.</p>
+            <p id="welcomeText">Learn step-by-step across 8 cybersecurity modules, test suspicious links, and get instant victim reporting assistance.</p>
             <div class="hero-actions">
-              <button class="btn-primary" onclick="switchSection('modules')">📚 Start 8 Learning Modules</button>
+              <button class="btn-primary" onclick="switchSection('modules')">📚 Open Modules</button>
               <button class="btn-secondary" onclick="switchSection('dashboard')">📊 Open Security Dashboard</button>
               <button class="btn-danger" onclick="switchSection('report-crime')">🚨 Victim? Report Crime Now</button>
             </div>
@@ -106,19 +146,19 @@
         <!-- Scrollable Feature Overview -->
         <section class="home-block container">
           <h2 class="section-heading">What You Can Do on CyberShield</h2>
-          <p class="section-sub">Interactive chapters and tools built to help students, families, and everyday users detect online fraud before losing money.</p>
+          <p class="section-sub">Interactive modules and tools built to help students, families, and everyday users detect online fraud before losing money.</p>
           <div class="quick-grid">
             <div class="feature-card" onclick="switchSection('modules')">
-              <h3>📚 8 Chapter-Wise Modules</h3>
-              <p>Step-by-step cybersecurity lessons with pre-check & post-check quizzes after every chapter.</p>
+              <h3>📚 8 Interactive Modules</h3>
+              <p>Each module includes full lesson content alongside its own Pre-Assessment and Post-Assessment.</p>
             </div>
-            <div class="feature-card" onclick="openModule('link-checker')">
+            <div class="feature-card" onclick="openDashboardTool('link-checker')">
               <h3>🔗 Suspicious Link Checker</h3>
               <p>Paste any URL or test built-in examples to scan for phishing patterns and fake domains.</p>
             </div>
-            <div class="feature-card" onclick="openModule('quiz')">
-              <h3>📝 3-Stage Assessments</h3>
-              <p>Standalone Pre-Assessment, Assessment, and Post-Assessment tracks to benchmark your knowledge.</p>
+            <div class="feature-card" onclick="openDashboardTool('payment-quiz')">
+              <h3>💳 Fake Payment Quiz</h3>
+              <p>Inspect UPI receipts and spot forged timestamps or fake transaction IDs.</p>
             </div>
             <div class="feature-card" onclick="switchSection('report-crime')">
               <h3>🚨 Emergency Victim Desk</h3>
@@ -127,7 +167,7 @@
           </div>
         </section>
 
-        <!-- Interactive Box-Style Knowledge & Privacy Hub (Myths vs Facts, Stories, Privacy) -->
+        <!-- Interactive Box-Style Knowledge & Privacy Hub -->
         <section id="homeKnowledgeHub" class="home-block container" style="padding-top: 0.5rem;">
           <div class="card knowledge-hub-card">
             <h2 class="section-heading">🛡️ Citizen Cyber Awareness & Privacy Hub</h2>
@@ -151,7 +191,7 @@
               <div class="privacy-grid">
                 <div class="privacy-card">
                   <h4>1. Local-First Storage</h4>
-                  <p>Your profile, chapter progress, and quiz scores stay directly inside your browser. We never sell or harvest your personal browsing history.</p>
+                  <p>Your profile, module progress, and scores stay directly inside your browser. We never sell or harvest your personal browsing history.</p>
                 </div>
                 <div class="privacy-card">
                   <h4>2. No Sensitive Credentials</h4>
@@ -168,36 +208,36 @@
       </div>
 
       <!-- =========================================================
-           VIEW 2: DEDICATED CHAPTER-WISE LEARNING MODULES (8 CHAPTERS)
+           VIEW 2: MODULES (Module 1 to Module 8 -> Content, Pre-Assessment, Post-Assessment)
            ========================================================= -->
       <div id="modules" class="view container">
         <div class="dash-header" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
           <div>
-            <h2>📚 CyberShield Chapter-Wise Learning Modules</h2>
-            <p class="subtitle" style="margin-bottom:0;">Learn how modern cyber threats work across 8 structured chapters—each with its own Pre-Check, Lesson, and Post-Check.</p>
+            <h2>📚 CyberShield Modules</h2>
+            <p class="subtitle" style="margin-bottom:0;">Select a module below to view its content, Pre-Assessment, and Post-Assessment.</p>
           </div>
           <div class="module-progress-badge">
-            Chapters Completed: <strong id="chapterProgressBadge">0 / 8</strong>
+            Modules Completed: <strong id="chapterProgressBadge">0 / 8</strong>
           </div>
         </div>
 
-        <!-- 8 Chapter Cards Grid -->
+        <!-- Module 1 to Module 8 Cards -->
         <div class="chapters-grid" id="chaptersGrid"></div>
 
-        <!-- Active Chapter Reader Box -->
+        <!-- Selected Module Workspace: Module Content | Pre-Assessment | Post-Assessment -->
         <div id="chapterReaderCard" class="card chapter-reader hidden">
           <div class="reader-top-bar">
-            <span class="pill-tag" id="readerChapterTag">Chapter 1 of 8</span>
-            <button type="button" class="btn-secondary" onclick="closeChapterReader()">✕ Close Chapter</button>
+            <span class="pill-tag" id="readerChapterTag">Module 1 of 8</span>
+            <button type="button" class="btn-secondary" onclick="closeChapterReader()">✕ Close Module</button>
           </div>
           <h3 id="readerTitle" style="font-size:1.5rem;margin-bottom:0.35rem;"></h3>
           <p id="readerSubtitle" class="subtitle"></p>
 
-          <!-- Chapter Step Tabs: 1. Pre-Check | 2. Lesson | 3. Post-Check -->
+          <!-- Three Tabs for Each Module: Module Content | Pre-Assessment | Post-Assessment -->
           <div class="stage-tabs">
-            <button type="button" class="stage-btn active" id="chapTabPre" onclick="switchChapterStep('pre')">1. Chapter Pre-Check</button>
-            <button type="button" class="stage-btn" id="chapTabLesson" onclick="switchChapterStep('lesson')">2. Interactive Lesson</button>
-            <button type="button" class="stage-btn" id="chapTabPost" onclick="switchChapterStep('post')">3. Chapter Post-Check</button>
+            <button type="button" class="stage-btn active" id="chapTabLesson" onclick="switchChapterStep('lesson')">📖 Module Content</button>
+            <button type="button" class="stage-btn" id="chapTabPre" onclick="switchChapterStep('pre')">📝 Pre-Assessment</button>
+            <button type="button" class="stage-btn" id="chapTabPost" onclick="switchChapterStep('post')">✅ Post-Assessment</button>
           </div>
 
           <div id="chapterStepContent"></div>
@@ -205,21 +245,20 @@
       </div>
 
       <!-- =========================================================
-           VIEW 3: INTERACTIVE TOOLS & ASSESSMENTS DASHBOARD
+           VIEW 3: INTERACTIVE TOOLS DASHBOARD
            ========================================================= -->
       <div id="dashboard" class="view container">
         <div class="dash-header">
-          <h2>📊 CyberShield Tools & Assessments Dashboard</h2>
-          <p class="subtitle">Track your readiness score, chapter progress, and practice with interactive security tools and standalone assessments.</p>
+          <h2>📊 CyberShield Security Tools & Progress Dashboard</h2>
+          <p class="subtitle">Track your readiness score, completed modules, and practice with interactive cyber-defense tools.</p>
         </div>
 
-        <!-- 5 Stat Boxes: Modules Completed tracks the 8 Chapters -->
         <div class="stats-grid">
           <div class="stat-card">
             <h3>Readiness Score</h3>
             <p class="stat-value" id="statScore">0%</p>
           </div>
-          <div class="stat-card" style="cursor:pointer;" onclick="switchSection('modules')" title="Click to open 8 Learning Chapters">
+          <div class="stat-card" style="cursor:pointer;" onclick="switchSection('modules')" title="Click to open Modules">
             <h3>Modules Completed</h3>
             <p class="stat-value" id="statModules">0 / 8</p>
           </div>
@@ -228,7 +267,7 @@
             <p class="stat-value" id="statLinks">0</p>
           </div>
           <div class="stat-card">
-            <h3>Assessments Done</h3>
+            <h3>Post-Assessments</h3>
             <p class="stat-value" id="statQuizzes">0</p>
           </div>
           <div class="stat-card">
@@ -237,10 +276,10 @@
           </div>
         </div>
 
-        <!-- Tool Switcher Pills -->
+        <!-- Tool Switcher Pills (Modules quick button + 5 Interactive Tools) -->
         <div class="tool-tabs">
+          <button class="tool-btn" onclick="switchSection('modules')">📚 Modules (1 – 8)</button>
           <button class="tool-btn active" data-tool="link-checker">🔗 Link Checker</button>
-          <button class="tool-btn" data-tool="quiz">📝 Assessments (Pre / Mid / Post)</button>
           <button class="tool-btn" data-tool="scenarios">🎭 Scam Scenarios</button>
           <button class="tool-btn" data-tool="payment-quiz">💳 Fake Payment Quiz</button>
           <button class="tool-btn" data-tool="simulator">📱 Simulator</button>
@@ -270,37 +309,25 @@
           <div id="urlResult" class="result-box hidden"></div>
         </div>
 
-        <!-- Tool 2: Standalone 3-Stage Assessments (Pre, Assessment, Post) -->
-        <div id="quiz" class="tool-panel card">
-          <h3>📝 Cybersecurity Assessments</h3>
-          <p class="subtitle">Independent 3-stage assessment tracks to test your baseline, applied, and mastery knowledge.</p>
-          <div class="stage-tabs">
-            <button class="stage-btn active" data-stage="pre" onclick="selectAssessmentStage('pre')">1. Pre-Assessment</button>
-            <button class="stage-btn" data-stage="mid" onclick="selectAssessmentStage('mid')">2. Assessment</button>
-            <button class="stage-btn" data-stage="post" onclick="selectAssessmentStage('post')">3. Post-Assessment</button>
-          </div>
-          <div id="quizContainer"></div>
-        </div>
-
-        <!-- Tool 3: Scam Scenarios -->
+        <!-- Tool 2: Scam Scenarios -->
         <div id="scenarios" class="tool-panel card">
           <h3>🎭 Scam Scenario Module</h3>
           <div id="scenarioContainer"></div>
         </div>
 
-        <!-- Tool 4: Fake Payment Quiz -->
+        <!-- Tool 3: Fake Payment Quiz -->
         <div id="payment-quiz" class="tool-panel card">
           <h3>💳 Fake Payment Screenshot Quiz</h3>
           <div id="paymentContainer"></div>
         </div>
 
-        <!-- Tool 5: Simulator -->
+        <!-- Tool 4: Simulator -->
         <div id="simulator" class="tool-panel card">
           <h3>📱 Interactive Phishing Simulator</h3>
           <div id="simulatorContainer"></div>
         </div>
 
-        <!-- Tool 6: Expanded Privacy & Security Checkup -->
+        <!-- Tool 5: Expanded Privacy & Security Checkup -->
         <div id="checkup" class="tool-panel card">
           <h3>🔒 Personal Security & Privacy Hygiene Checkup</h3>
           <p class="subtitle">Tick all the security practices you actively follow to calculate your protection score.</p>
@@ -401,7 +428,7 @@
                   <option value="UPI / Banking Fraud Alert">UPI / Banking Fraud Alert</option>
                   <option value="Suspicious Phishing Link Submission">Suspicious Phishing Link Submission</option>
                   <option value="UI / Feature Suggestion">UI / Feature Suggestion</option>
-                  <option value="Assessment / Quiz Feedback">Assessment / Quiz Feedback</option>
+                  <option value="Module / Assessment Feedback">Module / Assessment Feedback</option>
                   <option value="Victim Helpline (1930) Experience">Victim Helpline (1930) Experience</option>
                   <option value="Bug / Technical Issue">Bug / Technical Issue</option>
                 </select>

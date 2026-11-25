@@ -1,17 +1,18 @@
 // --- State & LocalStorage Persistence ---
 const defaultStats = {
   linksChecked: 0,
-  quizzesCompleted: 0,
+  postAssessmentsDone: 0,
   scenariosSolved: 0,
-  lastQuizScore: 0,
-  completedChapters: [] // Tracks the 8 chapter-wise learning modules independently
+  completedChapters: [] // Tracks Module 1 through Module 8
 };
 
 let stats = JSON.parse(localStorage.getItem('cs_stats')) || { ...defaultStats };
 if (!Array.isArray(stats.completedChapters)) stats.completedChapters = [];
+if (typeof stats.postAssessmentsDone !== 'number') stats.postAssessmentsDone = 0;
 
 let currentUser = JSON.parse(localStorage.getItem('cs_currentUser')) || null;
 let generatedCode = null;
+let forgotResetCode = null;
 
 function saveStats() {
   localStorage.setItem('cs_stats', JSON.stringify(stats));
@@ -19,7 +20,7 @@ function saveStats() {
   renderChaptersGrid();
 }
 
-// --- Login-First Gate Logic ---
+// --- Login-First Gate, Forgot Password & Change Password Logic ---
 const loginGate = document.getElementById('loginGate');
 const appShell = document.getElementById('appShell');
 
@@ -34,24 +35,31 @@ function checkAuthState() {
   }
 }
 
-document.getElementById('loginTabBtn').addEventListener('click', () => {
-  document.getElementById('loginTabBtn').classList.add('active');
-  document.getElementById('registerTabBtn').classList.remove('active');
-  document.getElementById('loginForm').classList.remove('hidden');
-  document.getElementById('registerForm').classList.add('hidden');
-});
+function showGateForm(which) {
+  document.getElementById('loginForm').classList.toggle('hidden', which !== 'login');
+  document.getElementById('registerForm').classList.toggle('hidden', which !== 'register');
+  document.getElementById('forgotForm').classList.toggle('hidden', which !== 'forgot');
 
-document.getElementById('registerTabBtn').addEventListener('click', () => {
-  document.getElementById('registerTabBtn').classList.add('active');
-  document.getElementById('loginTabBtn').classList.remove('active');
-  document.getElementById('registerForm').classList.remove('hidden');
-  document.getElementById('loginForm').classList.add('hidden');
-});
+  document.getElementById('loginTabBtn').classList.toggle('active', which === 'login');
+  document.getElementById('registerTabBtn').classList.toggle('active', which === 'register');
+}
+
+document.getElementById('loginTabBtn').addEventListener('click', () => showGateForm('login'));
+document.getElementById('registerTabBtn').addEventListener('click', () => showGateForm('register'));
+document.getElementById('openForgotBtn').addEventListener('click', () => showGateForm('forgot'));
+document.getElementById('backToLoginBtn').addEventListener('click', () => showGateForm('login'));
 
 document.getElementById('sendCodeBtn').addEventListener('click', () => {
   generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
   const banner = document.getElementById('demoCodeBanner');
   banner.textContent = `Verification Code: ${generatedCode}`;
+  banner.classList.remove('hidden');
+});
+
+document.getElementById('sendForgotCodeBtn').addEventListener('click', () => {
+  forgotResetCode = Math.floor(100000 + Math.random() * 900000).toString();
+  const banner = document.getElementById('forgotCodeBanner');
+  banner.textContent = `Reset Verification Code: ${forgotResetCode}`;
   banner.classList.remove('hidden');
 });
 
@@ -91,7 +99,7 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
   const users = JSON.parse(localStorage.getItem('cs_users')) || [];
   const found = users.find(u => u.email === email && u.password === password);
   if (!found) {
-    msg.textContent = 'Invalid email or password (or use Create Profile / Demo Login).';
+    msg.textContent = 'Invalid email or password (or use Forgot Password / Create Profile).';
     return;
   }
 
@@ -100,16 +108,101 @@ document.getElementById('loginForm').addEventListener('submit', (e) => {
   checkAuthState();
 });
 
+document.getElementById('forgotForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = document.getElementById('forgotEmail').value.trim().toLowerCase();
+  const code = document.getElementById('forgotCode').value.trim();
+  const newPass = document.getElementById('forgotNewPassword').value;
+  const msg = document.getElementById('forgotMsg');
+
+  if (!forgotResetCode || code !== forgotResetCode) {
+    msg.textContent = 'Please click "Get Code" and enter the 6-digit reset code.';
+    return;
+  }
+
+  const users = JSON.parse(localStorage.getItem('cs_users')) || [];
+  const userIdx = users.findIndex(u => u.email === email);
+  if (userIdx === -1) {
+    msg.textContent = 'No account found with that email. Please create a profile first.';
+    return;
+  }
+
+  users[userIdx].password = newPass;
+  localStorage.setItem('cs_users', JSON.stringify(users));
+  currentUser = users[userIdx];
+  localStorage.setItem('cs_currentUser', JSON.stringify(currentUser));
+  msg.textContent = '';
+  showGateForm('login');
+  checkAuthState();
+});
+
 document.getElementById('demoQuickLoginBtn').addEventListener('click', () => {
-  currentUser = { name: 'Dedeepya Reddy', email: 'citizen@cybershield.in' };
+  const demoUser = { name: 'Dedeepya Reddy', email: 'citizen@cybershield.in', password: 'password123' };
+  const users = JSON.parse(localStorage.getItem('cs_users')) || [];
+  if (!users.find(u => u.email === demoUser.email)) {
+    users.push(demoUser);
+    localStorage.setItem('cs_users', JSON.stringify(users));
+  }
+  currentUser = users.find(u => u.email === demoUser.email) || demoUser;
   localStorage.setItem('cs_currentUser', JSON.stringify(currentUser));
   checkAuthState();
+});
+
+// Change Password Modal (Inside Profile Dropdown)
+function openChangePasswordModal() {
+  closeProfileMenu();
+  document.getElementById('changePassForm').reset();
+  document.getElementById('changePassMsg').textContent = '';
+  document.getElementById('changePassModal').classList.remove('hidden');
+}
+
+document.getElementById('closeChangePassBtn').addEventListener('click', () => {
+  document.getElementById('changePassModal').classList.add('hidden');
+});
+
+document.getElementById('changePassForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const oldPass = document.getElementById('oldPasswordInput').value;
+  const newPass = document.getElementById('newPasswordInput').value;
+  const confirmPass = document.getElementById('confirmNewPasswordInput').value;
+  const msg = document.getElementById('changePassMsg');
+
+  if (!currentUser) return;
+
+  if (currentUser.password && oldPass !== currentUser.password) {
+    msg.style.color = '#dc2626';
+    msg.textContent = 'Current password is incorrect.';
+    return;
+  }
+
+  if (newPass !== confirmPass) {
+    msg.style.color = '#dc2626';
+    msg.textContent = 'New passwords do not match.';
+    return;
+  }
+
+  currentUser.password = newPass;
+  localStorage.setItem('cs_currentUser', JSON.stringify(currentUser));
+
+  const users = JSON.parse(localStorage.getItem('cs_users')) || [];
+  const idx = users.findIndex(u => u.email === currentUser.email);
+  if (idx !== -1) {
+    users[idx].password = newPass;
+    localStorage.setItem('cs_users', JSON.stringify(users));
+  }
+
+  msg.style.color = '#16a34a';
+  msg.textContent = '✅ Password updated successfully!';
+  setTimeout(() => {
+    document.getElementById('changePassModal').classList.add('hidden');
+  }, 1100);
 });
 
 function logout() {
   currentUser = null;
   localStorage.removeItem('cs_currentUser');
   closeProfileMenu();
+  showGateForm('login');
   checkAuthState();
 }
 
@@ -142,7 +235,7 @@ function switchSection(viewId) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-function openModule(toolId) {
+function openDashboardTool(toolId) {
   switchSection('dashboard');
   switchTool(toolId);
 }
@@ -185,13 +278,12 @@ function updateDashboard() {
   if (badge) badge.textContent = `${completedCount} / 8`;
 
   document.getElementById('statLinks').textContent = stats.linksChecked;
-  document.getElementById('statQuizzes').textContent = stats.quizzesCompleted;
+  document.getElementById('statQuizzes').textContent = stats.postAssessmentsDone;
   document.getElementById('statScenarios').textContent = stats.scenariosSolved;
 
-  const chapterContribution = (completedCount / 8) * 50;
-  const quizContribution = (stats.lastQuizScore / 100) * 30;
-  const activityContribution = Math.min(20, (stats.scenariosSolved * 5) + (stats.linksChecked * 2));
-  const readiness = Math.min(100, Math.round(chapterContribution + quizContribution + activityContribution));
+  const moduleScore = (completedCount / 8) * 70;
+  const toolScore = Math.min(30, (stats.scenariosSolved * 6) + (stats.linksChecked * 3));
+  const readiness = Math.min(100, Math.round(moduleScore + toolScore));
   document.getElementById('statScore').textContent = `${readiness}%`;
 
   if (currentUser) {
@@ -199,27 +291,23 @@ function updateDashboard() {
     document.getElementById('profileNameLabel').textContent = currentUser.name.split(' ')[0];
     document.getElementById('dropFullName').textContent = currentUser.name;
     document.getElementById('dropEmail').textContent = currentUser.email;
-    document.getElementById('welcomeText').textContent = `Welcome back, ${currentUser.name}! Explore your 8 cybersecurity chapters and safety tools below.`;
+    document.getElementById('welcomeText').textContent = `Welcome back, ${currentUser.name}! Open Modules 1 to 8 to explore lessons, Pre-Assessments, and Post-Assessments.`;
     const fbNameInput = document.getElementById('fbName');
     if (fbNameInput && !fbNameInput.value) fbNameInput.value = currentUser.name;
   }
 }
 
 // =========================================================
-// DEDICATED 8 CHAPTER-WISE LEARNING MODULES (Pre -> Lesson -> Post)
+// MODULES 1 TO 8 (Each Module -> Module Content, Pre-Assessment, Post-Assessment)
 // =========================================================
-const learningChapters = [
+const learningModules = [
   {
     id: 1,
+    label: 'Module 1',
     title: 'UPI & Digital Payment Safety',
     summary: 'How QR code traps, collect requests, and fake payment screenshots work.',
-    preQuestion: {
-      q: 'Pre-Check: If someone wants to send you ₹1,000 via UPI, what do you need to do?',
-      options: ['Scan their QR code and enter your UPI PIN', 'Nothing—money arrives directly without entering your PIN', 'Click a WhatsApp refund link'],
-      answer: 1
-    },
     lesson: {
-      heading: 'How UPI Fraud Happens & How to Stay Safe',
+      heading: 'Module 1 Content: How UPI Fraud Happens & How to Stay Safe',
       points: [
         'A UPI PIN is ONLY required when money is leaving your bank account—never when receiving money.',
         'Scammers send "Collect Requests" disguised as cashback or refunds; approving them deducts your balance.',
@@ -227,23 +315,38 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: Never scan a QR code or enter your UPI PIN to receive money.'
     },
-    postQuestion: {
-      q: 'Post-Check: A buyer on OLX sends a QR code asking you to scan it to receive an advance payment. What is happening?',
-      options: ['It is a standard business payment method', 'It is a scam attempt to deduct money from your account', 'It verifies your bank KYC'],
-      answer: 1
-    }
+    preAssessment: [
+      {
+        q: 'If someone wants to send you ₹1,000 via UPI, what do you need to do?',
+        options: ['Scan their QR code and enter your UPI PIN', 'Nothing—money arrives directly without entering your PIN', 'Click a WhatsApp refund link'],
+        answer: 1
+      },
+      {
+        q: 'What happens if you approve an unknown UPI "Collect Request"?',
+        options: ['Money is added to your bank', 'Money is deducted from your bank account', 'Your KYC gets updated'],
+        answer: 1
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'A buyer sends a QR code asking you to scan it to receive an advance payment. What is happening?',
+        options: ['Standard business payment', 'A scam attempt to deduct money from your account', 'Bank verification'],
+        answer: 1
+      },
+      {
+        q: 'A customer shows a "Payment Successful" screenshot, but your bank SMS has not arrived. What should you do?',
+        options: ['Hand over the item immediately', 'Check your actual bank/UPI transaction history inside your own app first', 'Ask for another screenshot'],
+        answer: 1
+      }
+    ]
   },
   {
     id: 2,
+    label: 'Module 2',
     title: 'Phishing Links & Fake Domains',
     summary: 'Spot lookalike bank URLs, SMS lures, and malicious top-level domains.',
-    preQuestion: {
-      q: 'Pre-Check: Which of these URLs is the genuine Government of India cybercrime portal?',
-      options: ['http://cybercrime-help.xyz', 'https://cybercrime.gov.in', 'https://gov-in-verify.tk'],
-      answer: 1
-    },
     lesson: {
-      heading: 'Anatomy of a Phishing Link',
+      heading: 'Module 2 Content: Anatomy of a Phishing Link',
       points: [
         'Attackers register lookalike domains (such as sbi-kyc-alert.xyz) to steal net-banking passwords and OTPs.',
         'Always read the domain right before the first single "/" — subdomains like "sbi.verify-login.tk" belong to verify-login.tk, not SBI.',
@@ -251,23 +354,38 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: Never click banking or KYC links inside SMS/WhatsApp—open the official app directly.'
     },
-    postQuestion: {
-      q: 'Post-Check: In the URL "https://hdfc-bank.update-kyc.top/login", who actually owns the website?',
-      options: ['HDFC Bank', 'update-kyc.top', 'Reserve Bank of India'],
-      answer: 1
-    }
+    preAssessment: [
+      {
+        q: 'Which of these URLs is the genuine Government of India cybercrime portal?',
+        options: ['http://cybercrime-help.xyz', 'https://cybercrime.gov.in', 'https://gov-in-verify.tk'],
+        answer: 1
+      },
+      {
+        q: 'Does the HTTPS padlock icon guarantee that a website is not a scam?',
+        options: ['Yes, 100% safe', 'No—scammers also use free SSL certificates on fake domains', 'Only on mobile phones'],
+        answer: 1
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'In the URL "https://hdfc-bank.update-kyc.top/login", who actually owns the website?',
+        options: ['HDFC Bank', 'update-kyc.top', 'Reserve Bank of India'],
+        answer: 1
+      },
+      {
+        q: 'You receive an SMS warning that your electricity will be disconnected tonight unless you click a link. What is the safe action?',
+        options: ['Click and pay ₹10 immediately', 'Ignore the link and check your official electricity board app/bill directly', 'Reply with your consumer ID'],
+        answer: 1
+      }
+    ]
   },
   {
     id: 3,
+    label: 'Module 3',
     title: '"Digital Arrest" & Impersonation Scams',
     summary: 'Recognize fake police, CBI, customs, and courier extortion video calls.',
-    preQuestion: {
-      q: 'Pre-Check: Can Indian Police or CBI place you under "Digital Arrest" over a Skype or WhatsApp video call?',
-      options: ['Yes, for parcel cases', 'No—Indian law enforcement never conducts arrests or collects money via video call', 'Only on weekends'],
-      answer: 1
-    },
     lesson: {
-      heading: 'How Fake Police & Courier Scams Operate',
+      heading: 'Module 3 Content: How Fake Police & Courier Scams Operate',
       points: [
         'Scammers call claiming a parcel in your name contains illegal items and transfer you to a fake police studio on video call.',
         'They threaten arrest unless you stay on camera and transfer "verification" or "bail" funds to an RBI/court account.',
@@ -275,23 +393,38 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: Disconnect the video call immediately, block the number, and report on 1930.'
     },
-    postQuestion: {
-      q: 'Post-Check: A caller in a police uniform on WhatsApp video warns you not to tell anyone and demands ₹50,000 to clear a fake courier case. What should you do?',
-      options: ['Transfer the money quickly', 'Hang up immediately—it is a Digital Arrest scam—and report it on 1930', 'Share your Aadhaar card on video'],
-      answer: 1
-    }
+    preAssessment: [
+      {
+        q: 'Can Indian Police or CBI place you under "Digital Arrest" over a Skype or WhatsApp video call?',
+        options: ['Yes, for parcel cases', 'No—Indian law enforcement never conducts arrests or collects money via video call', 'Only on weekends'],
+        answer: 1
+      },
+      {
+        q: 'Do real courts or RBI ever ask citizens to transfer money to "verify" innocence?',
+        options: ['Never', 'Yes, via UPI', 'Only for students'],
+        answer: 0
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'A caller in a police uniform on WhatsApp video warns you not to tell anyone and demands ₹50,000 to clear a fake courier case. What should you do?',
+        options: ['Transfer the money quickly', 'Hang up immediately—it is a Digital Arrest scam—and report it on 1930', 'Share your Aadhaar card on video'],
+        answer: 1
+      },
+      {
+        q: 'Why do Digital Arrest scammers order victims to stay on camera without informing family?',
+        options: ['To isolate the victim so nobody alerts them that it is a scam', 'Standard police rule', 'To record attendance'],
+        answer: 0
+      }
+    ]
   },
   {
     id: 4,
+    label: 'Module 4',
     title: 'Strong Passwords & 2FA Defense',
     summary: 'Protect email, banking, and social accounts from credential stuffing.',
-    preQuestion: {
-      q: 'Pre-Check: Why is using the same password across multiple websites risky?',
-      options: ['It slows down your browser', 'If one site suffers a data breach, hackers can unlock all your other accounts', 'Websites block repeated passwords'],
-      answer: 1
-    },
     lesson: {
-      heading: 'Building Unbreakable Account Security',
+      heading: 'Module 4 Content: Building Unbreakable Account Security',
       points: [
         'Use a unique 12+ character passphrase for every critical account (primary email, banking, GitHub, Instagram).',
         'Enable Two-Factor Authentication (2FA) using an Authenticator app or SMS OTP so a stolen password alone cannot log in.',
@@ -299,23 +432,38 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: Turn on 2FA on your primary email first, because email controls password resets for everything else.'
     },
-    postQuestion: {
-      q: 'Post-Check: A friend messages you on WhatsApp asking for a 6-digit code sent to your SMS by mistake. What is happening?',
-      options: ['They are trying to hijack your WhatsApp account', 'They are backing up their photos', 'It is a normal network check'],
-      answer: 0
-    }
+    preAssessment: [
+      {
+        q: 'Why is using the same password across multiple websites risky?',
+        options: ['It slows down your browser', 'If one site suffers a data breach, hackers can unlock all your other accounts', 'Websites block repeated passwords'],
+        answer: 1
+      },
+      {
+        q: 'What does 2FA (Two-Factor Authentication) add to your login?',
+        options: ['A second verification step beyond just your password', 'Faster Wi-Fi', 'Automatic password sharing'],
+        answer: 0
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'A friend messages you on WhatsApp asking for a 6-digit code sent to your SMS by mistake. What is happening?',
+        options: ['They are trying to hijack your WhatsApp account', 'They are backing up their photos', 'Normal network check'],
+        answer: 0
+      },
+      {
+        q: 'Which account should you secure with 2FA first?',
+        options: ['Your primary email account, since it resets passwords for all other services', 'A random gaming forum', 'None'],
+        answer: 0
+      }
+    ]
   },
   {
     id: 5,
+    label: 'Module 5',
     title: 'Safe Apps & Remote Access Traps',
     summary: 'Why unknown APK files and screen-sharing apps drain bank accounts.',
-    preQuestion: {
-      q: 'Pre-Check: Should you install an ".apk" file sent on WhatsApp to claim a reward or update bank KYC?',
-      options: ['Yes, if the icon looks official', 'No—sideloaded APKs can read your SMS OTPs and steal banking credentials', 'Only on Android phones'],
-      answer: 1
-    },
     lesson: {
-      heading: 'Protecting Your Device from Malware & Screen Spying',
+      heading: 'Module 5 Content: Protecting Your Device from Malware & Screen Spying',
       points: [
         'Malicious APK files disguised as wedding invites, challans, or bank rewards silently forward your incoming OTP SMS to attackers.',
         'Remote desktop apps (AnyDesk, TeamViewer, QuickSupport) let strangers watch your screen in real time.',
@@ -323,23 +471,38 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: Never install AnyDesk/TeamViewer on instructions from customer care callers.'
     },
-    postQuestion: {
-      q: 'Post-Check: Why do scammers ask victims to install AnyDesk during a fake customer support call?',
-      options: ['To fix battery drain', 'To mirror the victim’s screen and capture banking logins and OTPs', 'To update Android OS'],
-      answer: 1
-    }
+    preAssessment: [
+      {
+        q: 'Should you install an ".apk" file sent on WhatsApp to view a wedding invite or traffic challan?',
+        options: ['Yes, if it looks urgent', 'No—sideloaded APKs can read your SMS OTPs and steal banking credentials', 'Only on Android'],
+        answer: 1
+      },
+      {
+        q: 'What does a screen-sharing app like AnyDesk allow a caller to do?',
+        options: ['View everything on your phone screen including OTPs and banking apps', 'Only change wallpaper', 'Boost battery life'],
+        answer: 0
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'Why do scammers ask victims to install AnyDesk during a fake customer support call?',
+        options: ['To fix battery drain', 'To mirror the victim’s screen and capture banking logins and OTPs', 'To update Android OS'],
+        answer: 1
+      },
+      {
+        q: 'If you accidentally installed a suspicious APK from WhatsApp, what should you do immediately?',
+        options: ['Turn on Airplane Mode, uninstall the app, and check bank activity', 'Forward it to friends', 'Leave it installed'],
+        answer: 0
+      }
+    ]
   },
   {
     id: 6,
+    label: 'Module 6',
     title: 'Social Media Privacy & Identity Theft',
     summary: 'Prevent profile cloning, morphed images, and oversharing risks.',
-    preQuestion: {
-      q: 'Pre-Check: What is profile cloning on Instagram or Facebook?',
-      options: ['Creating a backup account', 'Scammers copying your public photos and name to ask your friends for urgent money', 'Syncing contacts'],
-      answer: 1
-    },
     lesson: {
-      heading: 'Locking Down Your Digital Footprint',
+      heading: 'Module 6 Content: Locking Down Your Digital Footprint',
       points: [
         'Public photos, birthdates, and college/workplace details make it easy for scammers to impersonate you or guess security questions.',
         'Set personal social media accounts to Private and hide your friend/follower list from strangers.',
@@ -347,23 +510,38 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: Always call your friend on their real phone number before transferring emergency money.'
     },
-    postQuestion: {
-      q: 'Post-Check: Your friend DMs you on Instagram asking for ₹5,000 urgently for a hospital bill via a new UPI ID. What should you do first?',
-      options: ['Send the money immediately', 'Call your friend directly on their saved phone number to verify', 'Reply with your bank details'],
-      answer: 1
-    }
+    preAssessment: [
+      {
+        q: 'What is profile cloning on Instagram or Facebook?',
+        options: ['Creating a backup account', 'Scammers copying your public photos and name to ask your friends for urgent money', 'Syncing contacts'],
+        answer: 1
+      },
+      {
+        q: 'Who can see your photos and friend list if your social profile is set to Public?',
+        options: ['Anyone on the internet, including scammers', 'Only your family', 'Nobody'],
+        answer: 0
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'Your friend DMs you on Instagram asking for ₹5,000 urgently for a hospital bill via a new UPI ID. What should you do first?',
+        options: ['Send the money immediately', 'Call your friend directly on their saved phone number to verify', 'Reply with your bank details'],
+        answer: 1
+      },
+      {
+        q: 'Which setting helps stop scammers from messaging all your contacts from a fake clone account?',
+        options: ['Hiding your follower/friend list and setting your profile to Private', 'Posting your phone number in bio', 'Using weak passwords'],
+        answer: 0
+      }
+    ]
   },
   {
     id: 7,
+    label: 'Module 7',
     title: 'Part-Time Job & Task Scam Awareness',
     summary: 'How "like YouTube videos / rate hotels" Telegram scams steal lakhs.',
-    preQuestion: {
-      q: 'Pre-Check: Why do Telegram "work-from-home task" scammers pay ₹150–₹500 at the very beginning?',
-      options: ['Because it is a genuine company', 'To build false trust before demanding large "prepaid VIP deposits" they never return', 'Government stipend'],
-      answer: 1
-    },
     lesson: {
-      heading: 'How Prepaid Task & Investment Scams Work',
+      heading: 'Module 7 Content: How Prepaid Task & Investment Scams Work',
       points: [
         'Scammers reach out via WhatsApp/Telegram offering easy money for liking videos or rating hotels.',
         'After paying a small initial amount to gain trust, they move victims to "prepaid crypto/merchant tasks" requiring ₹10,000 to ₹2,00,000.',
@@ -371,23 +549,38 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: A real job pays you for your work—it never asks you to deposit your own money to unlock earnings.'
     },
-    postQuestion: {
-      q: 'Post-Check: What is the biggest red flag of an online part-time job offer?',
-      options: ['Asking for a resume', 'Asking you to deposit money first to complete "prepaid tasks" or withdraw earnings', 'Conducting a video interview'],
-      answer: 1
-    }
+    preAssessment: [
+      {
+        q: 'Why do Telegram "work-from-home task" scammers pay ₹150–₹500 at the very beginning?',
+        options: ['Because it is a genuine company', 'To build false trust before demanding large "prepaid VIP deposits" they never return', 'Government stipend'],
+        answer: 1
+      },
+      {
+        q: 'Should a legitimate employer ever ask you to deposit money to unlock your salary?',
+        options: ['Never', 'Yes, always', 'Only for remote jobs'],
+        answer: 0
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'What is the biggest red flag of an online part-time job offer?',
+        options: ['Asking for a resume', 'Asking you to deposit money first to complete "prepaid tasks" or withdraw earnings', 'Conducting an interview'],
+        answer: 1
+      },
+      {
+        q: 'If you already lost money in a prepaid Telegram task group, what should you do?',
+        options: ['Pay more "tax" to get a refund', 'Stop paying immediately, save screenshots/UTR IDs, and report on 1930', 'Delete Telegram'],
+        answer: 1
+      }
+    ]
   },
   {
     id: 8,
+    label: 'Module 8',
     title: 'The 1930 "Golden Hour" Emergency Protocol',
     summary: 'Exact steps to freeze stolen money within the first 2 hours of fraud.',
-    preQuestion: {
-      q: 'Pre-Check: What is the most important 12-digit identifier needed when reporting a fraudulent UPI/bank transfer?',
-      options: ['Your Wi-Fi MAC address', 'The 12-digit UTR (Unique Transaction Reference) number', 'Your phone serial number'],
-      answer: 1
-    },
     lesson: {
-      heading: 'Immediate Action Plan When Cyber Fraud Strikes',
+      heading: 'Module 8 Content: Immediate Action Plan When Cyber Fraud Strikes',
       points: [
         'Act within the first 1–2 hours ("Golden Hour"): dial 1930 immediately so the Citizen Financial Cyber Fraud Reporting System can put a lien/freeze on the scammer’s account.',
         'File a detailed complaint on https://cybercrime.gov.in with screenshots of the transaction, UTR number, and scammer’s UPI/phone details.',
@@ -395,144 +588,167 @@ const learningChapters = [
       ],
       tip: 'Golden Rule: Speed saves money—report on 1930 first before visiting a police station.'
     },
-    postQuestion: {
-      q: 'Post-Check: If someone loses money to a cyber scammer, what should be their very first step?',
-      options: ['Wait 3 days to see if the bank refunds it automatically', 'Call 1930 immediately with the 12-digit UTR number and file at cybercrime.gov.in', 'Delete all chat messages'],
-      answer: 1
-    }
+    preAssessment: [
+      {
+        q: 'What is the most important 12-digit identifier needed when reporting a fraudulent UPI/bank transfer?',
+        options: ['Your Wi-Fi MAC address', 'The 12-digit UTR (Unique Transaction Reference) number', 'Your phone serial number'],
+        answer: 1
+      },
+      {
+        q: 'What is the 24x7 National Cybercrime Helpline number in India?',
+        options: ['1930', '108', '1999'],
+        answer: 0
+      }
+    ],
+    postAssessment: [
+      {
+        q: 'If someone loses money to a cyber scammer, what should be their very first step?',
+        options: ['Wait 3 days to see if the bank refunds it automatically', 'Call 1930 immediately with the 12-digit UTR number and file at cybercrime.gov.in', 'Delete all chat messages'],
+        answer: 1
+      },
+      {
+        q: 'Why is reporting within the first 1–2 hours called the "Golden Hour"?',
+        options: ['Banks can freeze the stolen funds before the scammer withdraws or moves them', 'Helpline is only open for 2 hours', 'It gives extra interest'],
+        answer: 0
+      }
+    ]
   }
 ];
 
-let activeChapterId = null;
-let activeChapterStep = 'pre';
+let activeModuleId = null;
+let activeModuleStep = 'lesson';
+let modQuizIdx = 0;
+let modQuizScore = 0;
 
 function renderChaptersGrid() {
   const grid = document.getElementById('chaptersGrid');
   if (!grid) return;
 
-  grid.innerHTML = learningChapters.map(ch => {
-    const isDone = stats.completedChapters.includes(ch.id);
+  grid.innerHTML = learningModules.map(mod => {
+    const isDone = stats.completedChapters.includes(mod.id);
     return `
-      <div class="chapter-card ${isDone ? 'completed-chap' : ''}" onclick="openChapter(${ch.id})">
+      <div class="chapter-card ${isDone ? 'completed-chap' : ''}" onclick="openChapter(${mod.id})">
         <div>
           <div class="chap-top">
-            <span class="chap-num">Chapter ${ch.id}</span>
-            <span class="chap-status ${isDone ? 'done' : 'pending'}">${isDone ? '✅ Completed' : 'Start Lesson'}</span>
+            <span class="chap-num">${mod.label}</span>
+            <span class="chap-status ${isDone ? 'done' : 'pending'}">${isDone ? '✅ Completed' : 'Open Module'}</span>
           </div>
-          <h4>${ch.title}</h4>
-          <p>${ch.summary}</p>
+          <h4>${mod.title}</h4>
+          <p>${mod.summary}</p>
         </div>
         <button type="button" class="btn-secondary" style="width:100%;padding:0.5rem;">
-          ${isDone ? 'Review Chapter' : 'Open Chapter →'}
+          ${isDone ? 'Review Module' : 'Start Module →'}
         </button>
       </div>
     `;
   }).join('');
 }
 
-function openChapter(chapterId) {
-  activeChapterId = chapterId;
-  activeChapterStep = 'pre';
-  const ch = learningChapters.find(c => c.id === chapterId);
-  if (!ch) return;
+function openChapter(moduleId) {
+  activeModuleId = moduleId;
+  const mod = learningModules.find(m => m.id === moduleId);
+  if (!mod) return;
 
   const reader = document.getElementById('chapterReaderCard');
   reader.classList.remove('hidden');
-  document.getElementById('readerChapterTag').textContent = `Chapter ${ch.id} of ${learningChapters.length}`;
-  document.getElementById('readerTitle').textContent = ch.title;
-  document.getElementById('readerSubtitle').textContent = ch.summary;
+  document.getElementById('readerChapterTag').textContent = `${mod.label} of ${learningModules.length}`;
+  document.getElementById('readerTitle').textContent = `${mod.label}: ${mod.title}`;
+  document.getElementById('readerSubtitle').textContent = mod.summary;
 
-  switchChapterStep('pre');
+  switchChapterStep('lesson');
   reader.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function closeChapterReader() {
   document.getElementById('chapterReaderCard').classList.add('hidden');
-  activeChapterId = null;
+  activeModuleId = null;
 }
 
 function switchChapterStep(step) {
-  activeChapterStep = step;
-  ['pre', 'lesson', 'post'].forEach(s => {
-    const btn = document.getElementById(`chapTab${s.charAt(0).toUpperCase() + s.slice(1)}`);
-    if (btn) btn.classList.toggle('active', s === step);
-  });
+  activeModuleStep = step;
+  modQuizIdx = 0;
+  modQuizScore = 0;
 
-  const ch = learningChapters.find(c => c.id === activeChapterId);
-  const box = document.getElementById('chapterStepContent');
-  if (!ch || !box) return;
+  document.getElementById('chapTabLesson').classList.toggle('active', step === 'lesson');
+  document.getElementById('chapTabPre').classList.toggle('active', step === 'pre');
+  document.getElementById('chapTabPost').classList.toggle('active', step === 'post');
 
-  if (step === 'pre') {
-    const pq = ch.preQuestion;
-    box.innerHTML = `
-      <p style="margin-bottom:0.75rem;font-size:1.05rem;"><strong>${pq.q}</strong></p>
-      ${pq.options.map((opt, idx) => `<button type="button" class="option-btn" onclick="answerChapterPre(${idx})">${opt}</button>`).join('')}
-      <div id="chapPreFeedback" class="result-box hidden"></div>
-    `;
-  } else if (step === 'lesson') {
-    box.innerHTML = `
-      <div class="lesson-body">
-        <h4>${ch.lesson.heading}</h4>
-        <ul class="lesson-points">
-          ${ch.lesson.points.map(pt => `<li>${pt}</li>`).join('')}
-        </ul>
-        <div class="lesson-tip-box">🛡️ <strong>${ch.lesson.tip}</strong></div>
-        <button type="button" class="btn-primary" onclick="switchChapterStep('post')">Proceed to Chapter Post-Check →</button>
-      </div>
-    `;
-  } else if (step === 'post') {
-    const postQ = ch.postQuestion;
-    box.innerHTML = `
-      <p style="margin-bottom:0.75rem;font-size:1.05rem;"><strong>${postQ.q}</strong></p>
-      ${postQ.options.map((opt, idx) => `<button type="button" class="option-btn" onclick="answerChapterPost(${idx})">${opt}</button>`).join('')}
-      <div id="chapPostFeedback" class="result-box hidden"></div>
-    `;
-  }
+  renderModuleStep();
 }
 
-function answerChapterPre(choice) {
-  const ch = learningChapters.find(c => c.id === activeChapterId);
-  const fb = document.getElementById('chapPreFeedback');
-  const isRight = choice === ch.preQuestion.answer;
-  fb.classList.remove('hidden', 'safe', 'warn');
-  fb.classList.add(isRight ? 'safe' : 'warn');
-  fb.innerHTML = `
-    <strong>${isRight ? '✅ Great baseline instinct!' : '💡 Good try—let’s learn why in the lesson!'}</strong>
-    <p style="margin:0.4rem 0;">Now read the core lesson to master this topic.</p>
-    <button type="button" class="btn-primary" style="margin-top:0.5rem;" onclick="switchChapterStep('lesson')">Read Chapter Lesson →</button>
+function renderModuleStep() {
+  const mod = learningModules.find(m => m.id === activeModuleId);
+  const box = document.getElementById('chapterStepContent');
+  if (!mod || !box) return;
+
+  if (activeModuleStep === 'lesson') {
+    box.innerHTML = `
+      <div class="lesson-body">
+        <h4>${mod.lesson.heading}</h4>
+        <ul class="lesson-points">
+          ${mod.lesson.points.map(pt => `<li>${pt}</li>`).join('')}
+        </ul>
+        <div class="lesson-tip-box">🛡️ <strong>${mod.lesson.tip}</strong></div>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+          <button type="button" class="btn-secondary" onclick="switchChapterStep('pre')">📝 Take Pre-Assessment</button>
+          <button type="button" class="btn-primary" onclick="switchChapterStep('post')">✅ Take Post-Assessment →</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const isPre = activeModuleStep === 'pre';
+  const questions = isPre ? mod.preAssessment : mod.postAssessment;
+  const stageLabel = isPre ? `${mod.label} — Pre-Assessment` : `${mod.label} — Post-Assessment`;
+
+  if (modQuizIdx >= questions.length) {
+    const passed = modQuizScore === questions.length;
+    if (!isPre && passed) {
+      if (!stats.completedChapters.includes(mod.id)) {
+        stats.completedChapters.push(mod.id);
+      }
+      stats.postAssessmentsDone++;
+      saveStats();
+    }
+
+    const nextId = mod.id < learningModules.length ? mod.id + 1 : null;
+    box.innerHTML = `
+      <div class="result-box ${isPre || passed ? 'safe' : 'warn'}">
+        <h4>${isPre ? '📝 Pre-Assessment Complete!' : (passed ? `🎉 ${mod.label} Post-Assessment Passed!` : `⚠️ ${mod.label} Post-Assessment Score: ${modQuizScore}/${questions.length}`)}</h4>
+        <p style="margin:0.5rem 0;">You scored <strong>${modQuizScore} out of ${questions.length}</strong>.</p>
+        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem;">
+          ${isPre
+            ? `<button type="button" class="btn-primary" onclick="switchChapterStep('lesson')">📖 Read ${mod.label} Content →</button>`
+            : (passed
+              ? (nextId
+                ? `<button type="button" class="btn-primary" onclick="openChapter(${nextId})">Open Module ${nextId} →</button>`
+                : `<button type="button" class="btn-primary" onclick="switchSection('dashboard')">All 8 Modules Completed! View Dashboard →</button>`)
+              : `<button type="button" class="btn-secondary" onclick="switchChapterStep('lesson')">← Review Module Content</button>
+                 <button type="button" class="btn-primary" onclick="switchChapterStep('post')">Retry Post-Assessment</button>`)
+          }
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const qObj = questions[modQuizIdx];
+  box.innerHTML = `
+    <div style="color:#38bdf8;font-size:0.88rem;font-weight:600;margin-bottom:0.35rem;">${stageLabel} (Question ${modQuizIdx + 1} of ${questions.length})</div>
+    <p style="margin-bottom:0.75rem;font-size:1.05rem;"><strong>${qObj.q}</strong></p>
+    ${qObj.options.map((opt, idx) => `<button type="button" class="option-btn" onclick="answerModuleQuestion(${idx})">${opt}</button>`).join('')}
   `;
 }
 
-function answerChapterPost(choice) {
-  const ch = learningChapters.find(c => c.id === activeChapterId);
-  const fb = document.getElementById('chapPostFeedback');
-  const isRight = choice === ch.postQuestion.answer;
-
-  if (isRight) {
-    if (!stats.completedChapters.includes(ch.id)) {
-      stats.completedChapters.push(ch.id);
-      saveStats();
-    }
-    const nextId = ch.id < learningChapters.length ? ch.id + 1 : null;
-    fb.classList.remove('hidden', 'danger');
-    fb.classList.add('safe');
-    fb.innerHTML = `
-      <strong>🎉 Chapter ${ch.id} Completed! (${stats.completedChapters.length} / 8 Modules Done)</strong>
-      <p style="margin:0.4rem 0;">You answered correctly and unlocked completion for <strong>${ch.title}</strong>.</p>
-      ${nextId
-        ? `<button type="button" class="btn-primary" style="margin-top:0.5rem;" onclick="openChapter(${nextId})">Start Chapter ${nextId} →</button>`
-        : `<button type="button" class="btn-primary" style="margin-top:0.5rem;" onclick="switchSection('dashboard')">All 8 Chapters Complete! Go to Dashboard →</button>`
-      }
-    `;
-  } else {
-    fb.classList.remove('hidden', 'safe');
-    fb.classList.add('danger');
-    fb.innerHTML = `
-      <strong>❌ Not quite!</strong>
-      <p style="margin:0.4rem 0;">Review the key takeaway in the lesson and try the Post-Check again to complete this chapter.</p>
-      <button type="button" class="btn-secondary" style="margin-top:0.5rem;" onclick="switchChapterStep('lesson')">← Back to Lesson</button>
-    `;
+function answerModuleQuestion(choice) {
+  const mod = learningModules.find(m => m.id === activeModuleId);
+  const questions = activeModuleStep === 'pre' ? mod.preAssessment : mod.postAssessment;
+  if (choice === questions[modQuizIdx].answer) {
+    modQuizScore++;
   }
+  modQuizIdx++;
+  renderModuleStep();
 }
 
 // --- Myths vs. Facts & Cybercrime Stories Content ---
@@ -715,152 +931,7 @@ function testExampleUrl(sampleUrl) {
   analyzeUrl(sampleUrl);
 }
 
-// --- Tool 2: Standalone 3-Stage Assessments (Independent of Chapter Modules) ---
-const assessmentBanks = {
-  pre: {
-    label: 'Pre-Assessment (Baseline Check)',
-    questions: [
-      {
-        q: 'Which of the following is the strongest password practice?',
-        options: ['Using your birthday + name', 'Using a unique 12+ character passphrase for each site', 'Reusing one complex password everywhere'],
-        answer: 1
-      },
-      {
-        q: 'You receive an urgent SMS saying your bank account is suspended with a link. What should you do?',
-        options: ['Click the link immediately', 'Reply with your PIN', 'Open your official bank app or call the number on your card'],
-        answer: 2
-      },
-      {
-        q: 'What does Two-Factor Authentication (2FA) protect against?',
-        options: ['Stolen passwords alone', 'Slow internet speeds', 'Hardware damage'],
-        answer: 0
-      },
-      {
-        q: 'Do you ever need to enter your UPI PIN to RECEIVE money into your bank account?',
-        options: ['Yes, always', 'No—UPI PIN is only required to SEND money', 'Only for amounts above ₹5,000'],
-        answer: 1
-      }
-    ]
-  },
-  mid: {
-    label: 'Assessment (Applied Scam Detection)',
-    questions: [
-      {
-        q: 'A link reads "https://sbi-kyc.verify-user.xyz". Which part is the actual domain you are connecting to?',
-        options: ['sbi-kyc.com', 'verify-user.xyz', 'sbi.co.in'],
-        answer: 1
-      },
-      {
-        q: 'A buyer sends a UPI payment screenshot claiming they paid ₹4,000, but your bank SMS has not arrived. What should you do?',
-        options: ['Hand over the item immediately', 'Open your own UPI/bank app and check actual credited balance first', 'Ask them to send another screenshot'],
-        answer: 1
-      },
-      {
-        q: 'An unknown caller asks you to install AnyDesk or TeamViewer to "fix a KYC issue". What is the risk?',
-        options: ['They can view your screen and capture OTPs/banking credentials', 'It speeds up your phone', 'No risk if you keep Wi-Fi on'],
-        answer: 0
-      },
-      {
-        q: 'Which URL indicator shows encrypted communication between your browser and a website?',
-        options: ['http://', 'https:// with a valid domain', 'ftp://'],
-        answer: 1
-      },
-      {
-        q: 'What is a "Digital Arrest" scam?',
-        options: ['A real CBI arrest over WhatsApp video call', 'Fraudsters impersonating police/customs on video calls to extort money', 'An official court summons via SMS'],
-        answer: 1
-      }
-    ]
-  },
-  post: {
-    label: 'Post-Assessment (Mastery & Emergency Response)',
-    questions: [
-      {
-        q: 'What is the National Cybercrime Helpline number in India for immediate financial fraud reporting?',
-        options: ['1930', '108', '1999'],
-        answer: 0
-      },
-      {
-        q: 'Within how many hours ("Golden Hour") should financial cyber fraud be reported to maximize chances of freezing funds?',
-        options: ['Within the first 1–2 hours', 'After 15 days', 'Only after visiting a court'],
-        answer: 0
-      },
-      {
-        q: 'Which is the official Government of India portal for filing online cybercrime complaints?',
-        options: ['https://cybercrime.gov.in', 'http://india-cyber-help.tk', 'https://report-scam-now.xyz'],
-        answer: 0
-      },
-      {
-        q: 'What 12-digit number is most critical to give 1930 officers when reporting a fraudulent UPI transaction?',
-        options: ['Your phone IMEI', 'The 12-digit UTR / UPI Transaction Reference Number', 'Your Aadhaar enrollment ID'],
-        answer: 1
-      },
-      {
-        q: 'After spotting a phishing email on your account, what is the safest complete response?',
-        options: ['Forward it to 10 friends', 'Do not click links, mark as phishing/spam, and enable 2FA if you interacted with it', 'Reply asking the scammer to stop'],
-        answer: 1
-      }
-    ]
-  }
-};
-
-let currentStage = 'pre';
-let quizIdx = 0;
-let quizCorrect = 0;
-
-function selectAssessmentStage(stage) {
-  currentStage = stage;
-  quizIdx = 0;
-  quizCorrect = 0;
-  document.querySelectorAll('.stage-btn').forEach(b => b.classList.remove('active'));
-  const activeBtn = document.querySelector(`.stage-btn[data-stage="${stage}"]`);
-  if (activeBtn) activeBtn.classList.add('active');
-  renderQuiz();
-}
-
-function renderQuiz() {
-  const container = document.getElementById('quizContainer');
-  const bank = assessmentBanks[currentStage];
-  const questions = bank.questions;
-
-  if (quizIdx >= questions.length) {
-    const pct = Math.round((quizCorrect / questions.length) * 100);
-    stats.quizzesCompleted++;
-    stats.lastQuizScore = pct;
-    saveStats();
-    container.innerHTML = `
-      <div class="result-box safe">
-        <h4>🎉 ${bank.label} Complete!</h4>
-        <p style="margin:0.5rem 0;">You scored <strong>${quizCorrect} out of ${questions.length} (${pct}%)</strong>.</p>
-        <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:1rem;">
-          <button class="btn-primary" onclick="resetQuiz()">Retake This Stage</button>
-          ${currentStage === 'pre' ? `<button class="btn-secondary" onclick="selectAssessmentStage('mid')">Proceed to Assessment →</button>` : ''}
-          ${currentStage === 'mid' ? `<button class="btn-secondary" onclick="selectAssessmentStage('post')">Proceed to Post-Assessment →</button>` : ''}
-        </div>
-      </div>`;
-    return;
-  }
-
-  const item = questions[quizIdx];
-  container.innerHTML = `
-    <div style="color:#38bdf8;font-size:0.88rem;font-weight:600;margin-bottom:0.35rem;">${bank.label} — Question ${quizIdx + 1} of ${questions.length}</div>
-    <p style="margin:0.65rem 0;font-size:1.05rem;">${item.q}</p>` +
-    item.options.map((opt, i) => `<button class="option-btn" onclick="answerQuiz(${i})">${opt}</button>`).join('');
-}
-
-function answerQuiz(choice) {
-  if (choice === assessmentBanks[currentStage].questions[quizIdx].answer) quizCorrect++;
-  quizIdx++;
-  renderQuiz();
-}
-
-function resetQuiz() {
-  quizIdx = 0;
-  quizCorrect = 0;
-  renderQuiz();
-}
-
-// --- Tool 3: Scam Scenarios ---
+// --- Tool 2: Scam Scenarios ---
 const scenarios = [
   {
     title: 'The "Wrongly Sent Money" UPI Call',
@@ -908,7 +979,7 @@ function nextScenario() {
   renderScenario();
 }
 
-// --- Tool 4: Expanded Fake Payment Screenshot Quiz ---
+// --- Tool 3: Expanded Fake Payment Screenshot Quiz ---
 const paymentCases = [
   {
     app: 'PayQuick UPI',
@@ -993,7 +1064,7 @@ function checkPayment(userSaidFake) {
     <button class="btn-secondary" style="margin-top:0.75rem;" onclick="payIdx++;renderPaymentQuiz();">Next Receipt →</button>`;
 }
 
-// --- Tool 5: Interactive Simulator ---
+// --- Tool 4: Interactive Simulator ---
 const simMessages = [
   {
     sender: '+91-98XXX-XXXXX (Unknown)',
@@ -1035,7 +1106,7 @@ function checkSim(reported) {
     <button class="btn-secondary" style="margin-top:0.75rem;" onclick="simIdx++;renderSimulator();">Next Message</button>`;
 }
 
-// --- Tool 6: Expanded Privacy & Security Checkup (10 Items) ---
+// --- Tool 5: Expanded Privacy & Security Checkup (10 Items) ---
 const checkupItems = [
   'I use unique passwords for every important email, banking, and social account.',
   'Two-Factor Authentication (2FA) is enabled on my email, WhatsApp, and bank apps.',
@@ -1071,7 +1142,6 @@ checkAuthState();
 renderChaptersGrid();
 renderMythsAndStories();
 renderRecentFeedback();
-renderQuiz();
 renderScenario();
 renderPaymentQuiz();
 renderSimulator();

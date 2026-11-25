@@ -42,7 +42,7 @@ body {
 }
 
 /* =========================================================
-   LOGIN-FIRST GATE (Soft Pastel "Baby" Aesthetic)
+   LOGIN-FIRST GATE & MODALS (Soft Pastel "Baby" Aesthetic)
    ========================================================= */
 .login-gate {
   min-height: 100vh;
@@ -53,7 +53,19 @@ body {
   background: radial-gradient(circle at top left, #1e293b 0%, #0b1120 70%);
 }
 
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 17, 32, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  z-index: 120;
+}
+
 .modal-content.baby-card {
+  position: relative;
   background: linear-gradient(180deg, #f0f9ff 0%, #fdf2f8 100%);
   color: var(--baby-text);
   border: 2px solid #bae6fd;
@@ -62,6 +74,17 @@ body {
   width: 100%;
   max-width: 430px;
   box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+}
+
+.close-modal {
+  position: absolute;
+  top: 0.9rem;
+  right: 1.1rem;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
 
 .baby-badge {
@@ -111,15 +134,22 @@ body {
   opacity: 0.92;
 }
 
-.btn-baby-ghost {
-  background: rgba(56, 189, 248, 0.14);
+.auth-extra-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.2rem;
+}
+
+.link-baby-btn {
+  background: none;
+  border: none;
   color: #0369a1;
-  border: 1px dashed #38bdf8;
-  padding: 0.65rem;
-  border-radius: 10px;
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   cursor: pointer;
+  text-decoration: underline;
 }
 
 .btn-baby-sec {
@@ -178,6 +208,7 @@ body {
 .form-msg {
   font-size: 0.86rem;
   color: #dc2626;
+  font-weight: 500;
 }
 
 /* =========================================================
@@ -278,7 +309,7 @@ body {
   position: absolute;
   right: 0;
   top: calc(100% + 0.5rem);
-  width: 220px;
+  width: 225px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -592,7 +623,7 @@ body {
 }
 
 /* =========================================================
-   CHAPTER-WISE LEARNING MODULES (8 CHAPTERS)
+   MODULES (Module 1 to Module 8 -> Content, Pre-Assessment, Post-Assessment)
    ========================================================= */
 .module-progress-badge {
   background: rgba(56, 189, 248, 0.14);
@@ -639,7 +670,7 @@ body {
 }
 
 .chap-num {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: var(--primary);
   text-transform: uppercase;
