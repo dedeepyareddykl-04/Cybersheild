@@ -3,16 +3,26 @@ const defaultStats = {
   linksChecked: 0,
   quizzesCompleted: 0,
   scenariosSolved: 0,
-  lastQuizScore: 0
+  lastQuizScore: 0,
+  completedModules: [] // Tracks up to 8 distinct modules
 };
 
 let stats = JSON.parse(localStorage.getItem('cs_stats')) || { ...defaultStats };
+if (!Array.isArray(stats.completedModules)) stats.completedModules = [];
+
 let currentUser = JSON.parse(localStorage.getItem('cs_currentUser')) || null;
 let generatedCode = null;
 
 function saveStats() {
   localStorage.setItem('cs_stats', JSON.stringify(stats));
   updateDashboard();
+}
+
+function markModuleComplete(moduleKey) {
+  if (!stats.completedModules.includes(moduleKey)) {
+    stats.completedModules.push(moduleKey);
+  }
+  saveStats();
 }
 
 // --- Login-First Gate Logic ---
@@ -158,16 +168,33 @@ document.querySelectorAll('.tool-btn').forEach(btn => {
   btn.addEventListener('click', () => switchTool(btn.dataset.tool));
 });
 
-// --- Update Stats & Profile UI ---
+// --- Home Knowledge Hub Tab Switcher (Myths vs Facts | Stories | Privacy) ---
+function switchHomeHub(panelId) {
+  document.querySelectorAll('.hub-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.hub-tab-btn').forEach(b => b.classList.remove('active'));
+
+  const targetPanel = document.getElementById(panelId);
+  if (targetPanel) targetPanel.classList.add('active');
+
+  const activeBtn = document.querySelector(`.hub-tab-btn[data-hub="${panelId}"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const hubCard = document.getElementById('homeKnowledgeHub');
+  if (hubCard) hubCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// --- Update Stats & Profile UI (Includes 0 / 8 Modules & Readiness Score) ---
 function updateDashboard() {
+  const completedCount = Math.min(8, stats.completedModules.length);
+  document.getElementById('statModules').textContent = `${completedCount} / 8`;
   document.getElementById('statLinks').textContent = stats.linksChecked;
   document.getElementById('statQuizzes').textContent = stats.quizzesCompleted;
   document.getElementById('statScenarios').textContent = stats.scenariosSolved;
 
-  const readiness = Math.min(
-    100,
-    Math.round((stats.lastQuizScore * 0.5) + (stats.scenariosSolved * 10) + (stats.linksChecked * 5))
-  );
+  // Readiness Score combines completed modules (up to 60%) + latest quiz score (up to 40%)
+  const moduleProgressPct = (completedCount / 8) * 60;
+  const quizContributionPct = (stats.lastQuizScore / 100) * 40;
+  const readiness = Math.min(100, Math.round(moduleProgressPct + quizContributionPct));
   document.getElementById('statScore').textContent = `${readiness}%`;
 
   if (currentUser) {
@@ -181,7 +208,7 @@ function updateDashboard() {
   }
 }
 
-// --- Myths vs. Facts & Cybercrime Stories (Scrollable Home) ---
+// --- Myths vs. Facts & Cybercrime Stories Content ---
 const mythsAndFacts = [
   {
     myth: '“I need to enter my UPI PIN or scan a QR code to receive money.”',
@@ -306,7 +333,7 @@ function toggleChecklist() {
   document.getElementById('victimPrepBox').scrollIntoView({ behavior: 'smooth' });
 }
 
-// --- Tool 1: Suspicious Link Checker + Example URLs ---
+// --- Tool 1: Suspicious Link Checker + Example URLs (Module 1 of 8) ---
 function analyzeUrl(rawUrl) {
   const resultBox = document.getElementById('urlResult');
   if (!rawUrl) return;
@@ -349,7 +376,7 @@ function analyzeUrl(rawUrl) {
   }
 
   stats.linksChecked++;
-  saveStats();
+  markModuleComplete('link_checker');
 }
 
 document.getElementById('checkUrlBtn').addEventListener('click', () => {
@@ -361,7 +388,7 @@ function testExampleUrl(sampleUrl) {
   analyzeUrl(sampleUrl);
 }
 
-// --- Tool 2: 3-Stage Assessments (Pre, Mid, Post) ---
+// --- Tool 2: 3-Stage Assessments (Modules 2, 3, 4 of 8) ---
 const assessmentBanks = {
   pre: {
     label: 'Pre-Assessment (Baseline Check)',
@@ -473,7 +500,7 @@ function renderQuiz() {
     const pct = Math.round((quizCorrect / questions.length) * 100);
     stats.quizzesCompleted++;
     stats.lastQuizScore = pct;
-    saveStats();
+    markModuleComplete(`assessment_${currentStage}`);
     container.innerHTML = `
       <div class="result-box safe">
         <h4>🎉 ${bank.label} Complete!</h4>
@@ -506,7 +533,7 @@ function resetQuiz() {
   renderQuiz();
 }
 
-// --- Tool 3: Scam Scenarios ---
+// --- Tool 3: Scam Scenarios (Module 5 of 8) ---
 const scenarios = [
   {
     title: 'The "Wrongly Sent Money" UPI Call',
@@ -545,7 +572,7 @@ function chooseScenario(i) {
   fb.innerHTML = `<p>${chosen.feedback}</p><button class="btn-secondary" style="margin-top:0.75rem;" onclick="nextScenario()">Next Scenario</button>`;
   if (chosen.safe) {
     stats.scenariosSolved++;
-    saveStats();
+    markModuleComplete('scam_scenarios');
   }
 }
 
@@ -554,7 +581,7 @@ function nextScenario() {
   renderScenario();
 }
 
-// --- Tool 4: Expanded Fake Payment Screenshot Quiz ---
+// --- Tool 4: Expanded Fake Payment Screenshot Quiz (Module 6 of 8) ---
 const paymentCases = [
   {
     app: 'PayQuick UPI',
@@ -637,9 +664,10 @@ function checkPayment(userSaidFake) {
   fb.classList.add(correct ? 'safe' : 'danger');
   fb.innerHTML = `<strong>${correct ? '✅ Correct!' : '❌ Incorrect!'}</strong><p>${p.reason}</p>
     <button class="btn-secondary" style="margin-top:0.75rem;" onclick="payIdx++;renderPaymentQuiz();">Next Receipt →</button>`;
+  markModuleComplete('payment_quiz');
 }
 
-// --- Tool 5: Interactive Simulator ---
+// --- Tool 5: Interactive Simulator (Module 7 of 8) ---
 const simMessages = [
   {
     sender: '+91-98XXX-XXXXX (Unknown)',
@@ -679,9 +707,10 @@ function checkSim(reported) {
   fb.innerHTML = `<strong>${correct ? '✅ Good eye!' : '❌ Watch out!'}</strong>
     <p>${m.isPhishing ? 'This is a classic phishing lure using urgency and a suspicious .tk domain.' : 'This is a standard security notification with no suspicious links.'}</p>
     <button class="btn-secondary" style="margin-top:0.75rem;" onclick="simIdx++;renderSimulator();">Next Message</button>`;
+  markModuleComplete('phishing_simulator');
 }
 
-// --- Tool 6: Expanded Privacy & Security Checkup (10 Items) ---
+// --- Tool 6: Expanded Privacy & Security Checkup (Module 8 of 8) ---
 const checkupItems = [
   'I use unique passwords for every important email, banking, and social account.',
   'Two-Factor Authentication (2FA) is enabled on my email, WhatsApp, and bank apps.',
@@ -710,6 +739,9 @@ function updateHygiene() {
   const checked = Array.from(cbs).filter(c => c.checked).length;
   document.getElementById('hygieneCount').textContent = `${checked} / ${cbs.length}`;
   document.getElementById('hygieneScore').textContent = `${Math.round((checked / cbs.length) * 100)}%`;
+  if (checked > 0) {
+    markModuleComplete('security_checkup');
+  }
 }
 
 // --- Initialize ---

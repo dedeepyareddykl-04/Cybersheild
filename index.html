@@ -124,36 +124,44 @@
           </div>
         </section>
 
-        <!-- Scrollable Myths vs. Facts & Real Cyber Stories Section -->
-        <section id="mythsStoriesSection" class="home-block myths-band">
-          <div class="container">
-            <h2 class="section-heading">💡 Cybersecurity Myths vs. Facts</h2>
-            <p class="section-sub">Common misconceptions that scammers rely on—and the real facts that keep you safe.</p>
-            <div class="myths-grid" id="mythsGrid"></div>
+        <!-- Interactive Box-Style Knowledge & Privacy Hub (Myths vs Facts, Stories, Privacy) -->
+        <section id="homeKnowledgeHub" class="home-block container" style="padding-top: 0.5rem;">
+          <div class="card knowledge-hub-card">
+            <h2 class="section-heading">🛡️ Citizen Cyber Awareness & Privacy Hub</h2>
+            <p class="section-sub" style="margin-bottom: 1.25rem;">Select a category below to explore myths vs. facts, real-world case stories, or our privacy commitment.</p>
 
-            <h2 class="section-heading" style="margin-top: 3.5rem;">📖 Real-World Cybercrime Case Stories</h2>
-            <p class="section-sub">Learn from real incidents across India so you never fall into the same trap.</p>
-            <div class="stories-grid" id="storiesGrid"></div>
-          </div>
-        </section>
+            <!-- Clickable Selector Tabs -->
+            <div class="hub-tabs">
+              <button type="button" class="hub-tab-btn active" data-hub="hub-myths" onclick="switchHomeHub('hub-myths')">💡 Myths vs. Facts</button>
+              <button type="button" class="hub-tab-btn" data-hub="hub-stories" onclick="switchHomeHub('hub-stories')">📖 Real-World Cybercrime Case Stories</button>
+              <button type="button" class="hub-tab-btn" data-hub="hub-privacy" onclick="switchHomeHub('hub-privacy')">🔒 Zero-Tracking Promises</button>
+            </div>
 
-        <!-- Scrollable Our Privacy Section -->
-        <section id="privacySection" class="home-block privacy-band">
-          <div class="container">
-            <h2 class="section-heading">🔒 Our Privacy & Zero-Tracking Promise</h2>
-            <p class="section-sub">Your safety starts with respecting your data.</p>
-            <div class="privacy-grid">
-              <div class="privacy-card">
-                <h4>1. Local-First Storage</h4>
-                <p>Your profile, quiz scores, and link checks stay directly inside your browser. We never sell or harvest your personal browsing history.</p>
-              </div>
-              <div class="privacy-card">
-                <h4>2. No Sensitive Credentials</h4>
-                <p>CyberShield will never ask for your bank account number, UPI PIN, Aadhaar number, or OTPs during training or simulations.</p>
-              </div>
-              <div class="privacy-card">
-                <h4>3. Direct Government Routing</h4>
-                <p>When you report a cybercrime, we connect you straight to official Indian government channels (1930 & cybercrime.gov.in) with zero middlemen.</p>
+            <!-- Panel 1: Myths vs. Facts -->
+            <div id="hub-myths" class="hub-panel active">
+              <div class="myths-grid" id="mythsGrid"></div>
+            </div>
+
+            <!-- Panel 2: Real-World Cybercrime Case Stories -->
+            <div id="hub-stories" class="hub-panel">
+              <div class="stories-grid" id="storiesGrid"></div>
+            </div>
+
+            <!-- Panel 3: Zero-Tracking Promises -->
+            <div id="hub-privacy" class="hub-panel">
+              <div class="privacy-grid">
+                <div class="privacy-card">
+                  <h4>1. Local-First Storage</h4>
+                  <p>Your profile, quiz scores, and link checks stay directly inside your browser. We never sell or harvest your personal browsing history.</p>
+                </div>
+                <div class="privacy-card">
+                  <h4>2. No Sensitive Credentials</h4>
+                  <p>CyberShield will never ask for your bank account number, UPI PIN, Aadhaar number, or OTPs during training or simulations.</p>
+                </div>
+                <div class="privacy-card">
+                  <h4>3. Direct Government Routing</h4>
+                  <p>When you report a cybercrime, we connect you straight to official Indian government channels (1930 & cybercrime.gov.in) with zero middlemen.</p>
+                </div>
               </div>
             </div>
           </div>
@@ -166,13 +174,18 @@
       <div id="dashboard" class="view container">
         <div class="dash-header">
           <h2>📊 CyberShield Training & Tools Dashboard</h2>
-          <p class="subtitle">Track your readiness score and use all 6 interactive protection tools.</p>
+          <p class="subtitle">Track your readiness score, completed modules, and use all 8 interactive protection activities.</p>
         </div>
 
+        <!-- 5 Stat Boxes including Modules Completed (0 / 8) -->
         <div class="stats-grid">
           <div class="stat-card">
             <h3>Readiness Score</h3>
             <p class="stat-value" id="statScore">0%</p>
+          </div>
+          <div class="stat-card">
+            <h3>Modules Completed</h3>
+            <p class="stat-value" id="statModules">0 / 8</p>
           </div>
           <div class="stat-card">
             <h3>Links Checked</h3>
