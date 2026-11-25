@@ -298,7 +298,7 @@ function updateDashboard() {
 }
 
 // =========================================================
-// MODULES 1 TO 8 (Each Module -> Module Content, Pre-Assessment, Post-Assessment)
+// MODULES 1 TO 8 (4 Pre-Assessment + 4 Post-Assessment Qs Each)
 // =========================================================
 const learningModules = [
   {
@@ -325,6 +325,16 @@ const learningModules = [
         q: 'What happens if you approve an unknown UPI "Collect Request"?',
         options: ['Money is added to your bank', 'Money is deducted from your bank account', 'Your KYC gets updated'],
         answer: 1
+      },
+      {
+        q: 'Can a scammer steal money just by knowing your public UPI ID (e.g., name@okaxis)?',
+        options: ['Yes, immediately without PIN', 'No—receiving a UPI ID alone cannot debit funds unless you approve a request or share your PIN', 'Only at night'],
+        answer: 1
+      },
+      {
+        q: 'Where should you check to confirm that a UPI payment has truly arrived?',
+        options: ['The buyer’s WhatsApp screenshot', 'Your own bank passbook/SMS or official UPI app history', 'A forwarded SMS from an unknown 10-digit mobile number'],
+        answer: 1
       }
     ],
     postAssessment: [
@@ -336,6 +346,16 @@ const learningModules = [
       {
         q: 'A customer shows a "Payment Successful" screenshot, but your bank SMS has not arrived. What should you do?',
         options: ['Hand over the item immediately', 'Check your actual bank/UPI transaction history inside your own app first', 'Ask for another screenshot'],
+        answer: 1
+      },
+      {
+        q: 'You receive a UPI notification saying "Enter PIN to claim ₹2,500 Cashback Reward". What is this?',
+        options: ['A legitimate bank reward', 'A malicious collect request trying to debit ₹2,500 from you', 'UPI system maintenance'],
+        answer: 1
+      },
+      {
+        q: 'A stranger calls claiming they accidentally sent ₹3,000 to your UPI and sends a link to "return it". What is the safe response?',
+        options: ['Click their link and enter your PIN', 'Check your actual bank balance first; if money truly arrived, ask them to contact their bank or verify independently without using links', 'Share your ATM card CVV'],
         answer: 1
       }
     ]
@@ -364,6 +384,16 @@ const learningModules = [
         q: 'Does the HTTPS padlock icon guarantee that a website is not a scam?',
         options: ['Yes, 100% safe', 'No—scammers also use free SSL certificates on fake domains', 'Only on mobile phones'],
         answer: 1
+      },
+      {
+        q: 'What is "Smishing"?',
+        options: ['Phishing attacks carried out through deceptive SMS text messages', 'Creating strong passwords', 'Updating phone software'],
+        answer: 0
+      },
+      {
+        q: 'Why do phishing messages often say "Action required within 2 hours or account will be blocked"?',
+        options: ['To create panic so you click without checking the URL carefully', 'Because bank servers delete accounts every 2 hours', 'Legal requirement'],
+        answer: 0
       }
     ],
     postAssessment: [
@@ -376,6 +406,16 @@ const learningModules = [
         q: 'You receive an SMS warning that your electricity will be disconnected tonight unless you click a link. What is the safe action?',
         options: ['Click and pay ₹10 immediately', 'Ignore the link and check your official electricity board app/bill directly', 'Reply with your consumer ID'],
         answer: 1
+      },
+      {
+        q: 'What does an "@" symbol inside a URL like "https://google.com@malicious-site.xyz" do?',
+        options: ['Everything before "@" is ignored by the browser, sending you to malicious-site.xyz', 'It sends an email to Google', 'It makes the connection safer'],
+        answer: 0
+      },
+      {
+        q: 'Which top-level domain extension is strictly reserved for official Indian government websites?',
+        options: ['.gov.in', '.gov-india.xyz', '.in-gov.tk'],
+        answer: 0
       }
     ]
   },
@@ -403,6 +443,16 @@ const learningModules = [
         q: 'Do real courts or RBI ever ask citizens to transfer money to "verify" innocence?',
         options: ['Never', 'Yes, via UPI', 'Only for students'],
         answer: 0
+      },
+      {
+        q: 'How do most Digital Arrest scams begin?',
+        options: ['An automated IVR call claiming a courier/parcel in your name was seized by customs', 'An in-person bank visit', 'A university exam portal'],
+        answer: 0
+      },
+      {
+        q: 'If a caller claims a SIM card registered on your Aadhaar is being used for crime, should you transfer money to clear it?',
+        options: ['No—it is an extortion script; hang up and verify via official portals like Sanchar Saathi', 'Yes, immediately', 'Only half the amount'],
+        answer: 0
       }
     ],
     postAssessment: [
@@ -414,6 +464,16 @@ const learningModules = [
       {
         q: 'Why do Digital Arrest scammers order victims to stay on camera without informing family?',
         options: ['To isolate the victim so nobody alerts them that it is a scam', 'Standard police rule', 'To record attendance'],
+        answer: 0
+      },
+      {
+        q: 'What should you do if scammers send a fake "CBI Arrest Warrant" PDF on WhatsApp?',
+        options: ['Do not panic or pay—real warrants are never served on WhatsApp with payment demands', 'Send them your bank balance screenshot', 'Join a Skype call with them'],
+        answer: 0
+      },
+      {
+        q: 'Which helpline should you call if someone attempts a Digital Arrest extortion call on you?',
+        options: ['1930 (National Cybercrime Helpline)', '198 (Mobile Network Complaint)', '139 (Railway Enquiry)'],
         answer: 0
       }
     ]
@@ -442,6 +502,16 @@ const learningModules = [
         q: 'What does 2FA (Two-Factor Authentication) add to your login?',
         options: ['A second verification step beyond just your password', 'Faster Wi-Fi', 'Automatic password sharing'],
         answer: 0
+      },
+      {
+        q: 'Which password is the hardest for automated tools to crack?',
+        options: ['Dedeepya2005', 'BlueTiger$Climbs#92River', '12345678'],
+        answer: 1
+      },
+      {
+        q: 'Is it safe to save passwords inside an unencrypted text file on a shared computer?',
+        options: ['No—anyone using that PC can read them; use a trusted password manager instead', 'Yes, always', 'Only on Desktop'],
+        answer: 0
       }
     ],
     postAssessment: [
@@ -453,6 +523,16 @@ const learningModules = [
       {
         q: 'Which account should you secure with 2FA first?',
         options: ['Your primary email account, since it resets passwords for all other services', 'A random gaming forum', 'None'],
+        answer: 0
+      },
+      {
+        q: 'What is "Credential Stuffing"?',
+        options: ['Hackers testing leaked username/password pairs from one site across banking and email sites', 'Backing up contacts', 'Encrypting a hard drive'],
+        answer: 0
+      },
+      {
+        q: 'What is WhatsApp "Two-Step Verification"?',
+        options: ['A custom 6-digit PIN required whenever your phone number is registered on a new device', 'Sending two messages at once', 'Changing your profile picture'],
         answer: 0
       }
     ]
@@ -481,6 +561,16 @@ const learningModules = [
         q: 'What does a screen-sharing app like AnyDesk allow a caller to do?',
         options: ['View everything on your phone screen including OTPs and banking apps', 'Only change wallpaper', 'Boost battery life'],
         answer: 0
+      },
+      {
+        q: 'Where is the safest place to download mobile banking or payment apps?',
+        options: ['Official Google Play Store or Apple App Store', 'Links sent in Telegram groups', 'Unknown third-party websites'],
+        answer: 0
+      },
+      {
+        q: 'Why is granting "SMS Read Permission" to an unknown utility app dangerous?',
+        options: ['It allows the app to silently read your bank OTPs', 'It uses too much screen brightness', 'It deletes your photos'],
+        answer: 0
       }
     ],
     postAssessment: [
@@ -492,6 +582,16 @@ const learningModules = [
       {
         q: 'If you accidentally installed a suspicious APK from WhatsApp, what should you do immediately?',
         options: ['Turn on Airplane Mode, uninstall the app, and check bank activity', 'Forward it to friends', 'Leave it installed'],
+        answer: 0
+      },
+      {
+        q: 'You receive a file named "RTO_eChallan_Receipt.apk" on WhatsApp. Why is this a trap?',
+        options: ['Real traffic challan receipts are PDFs or official parivahan.gov.in links—never an installable .apk app', 'All government receipts are .apk files', 'It is a video file'],
+        answer: 0
+      },
+      {
+        q: 'Do genuine bank customer care executives ever ask you to share a 9-digit AnyDesk/TeamViewer code?',
+        options: ['Never', 'Yes, for KYC updates', 'Only on Sundays'],
         answer: 0
       }
     ]
@@ -520,6 +620,16 @@ const learningModules = [
         q: 'Who can see your photos and friend list if your social profile is set to Public?',
         options: ['Anyone on the internet, including scammers', 'Only your family', 'Nobody'],
         answer: 0
+      },
+      {
+        q: 'Why should you avoid posting photos of boarding passes, ID cards, or full birthdates publicly?',
+        options: ['Attackers can use personal details for identity theft and password/account recovery attacks', 'It lowers image resolution', 'Social media bans ID photos'],
+        answer: 0
+      },
+      {
+        q: 'What should you do if you discover a fake account impersonating you?',
+        options: ['Report the account for impersonation immediately and alert your friends via status/story', 'Ignore it for months', 'Send them your password'],
+        answer: 0
       }
     ],
     postAssessment: [
@@ -531,6 +641,16 @@ const learningModules = [
       {
         q: 'Which setting helps stop scammers from messaging all your contacts from a fake clone account?',
         options: ['Hiding your follower/friend list and setting your profile to Private', 'Posting your phone number in bio', 'Using weak passwords'],
+        answer: 0
+      },
+      {
+        q: 'A stranger on social media threatens to leak edited/morphed photos unless you pay money ("Sextortion"). What is the right step?',
+        options: ['Do not pay (paying leads to endless demands); preserve screenshots, block them, and report on cybercrime.gov.in / 1930', 'Transfer money immediately', 'Delete all evidence'],
+        answer: 0
+      },
+      {
+        q: 'Why is using your pet’s name or birth year as a password unsafe if you share them on social media?',
+        options: ['Attackers can easily guess your password from your public posts', 'Websites forbid pet names', 'It expires in 24 hours'],
         answer: 0
       }
     ]
@@ -559,6 +679,16 @@ const learningModules = [
         q: 'Should a legitimate employer ever ask you to deposit money to unlock your salary?',
         options: ['Never', 'Yes, always', 'Only for remote jobs'],
         answer: 0
+      },
+      {
+        q: 'Where do most fake part-time task scams recruit victims?',
+        options: ['Unsolicited WhatsApp messages and Telegram groups', 'Official university placement cells', 'Government employment portals'],
+        answer: 0
+      },
+      {
+        q: 'What does a fake "dashboard balance" showing ₹85,000 profit on a scam website represent?',
+        options: ['Fake numbers controlled by scammers to trick you into paying withdrawal "taxes"', 'Real bank balance', 'RBI-insured funds'],
+        answer: 0
       }
     ],
     postAssessment: [
@@ -571,6 +701,16 @@ const learningModules = [
         q: 'If you already lost money in a prepaid Telegram task group, what should you do?',
         options: ['Pay more "tax" to get a refund', 'Stop paying immediately, save screenshots/UTR IDs, and report on 1930', 'Delete Telegram'],
         answer: 1
+      },
+      {
+        q: 'Why do other members inside a scam Telegram group post screenshots claiming they earned ₹50,000?',
+        options: ['They are fake accomplice accounts run by the scammers to pressure you into depositing', 'They are real employees', 'They are bank auditors'],
+        answer: 0
+      },
+      {
+        q: 'What is the golden rule to verify any online earning opportunity?',
+        options: ['Real work pays you; any platform demanding money upfront to earn or withdraw is a scam', 'Higher deposit always guarantees profit', 'If it has a Telegram group, it is safe'],
+        answer: 0
       }
     ]
   },
@@ -598,6 +738,16 @@ const learningModules = [
         q: 'What is the 24x7 National Cybercrime Helpline number in India?',
         options: ['1930', '108', '1999'],
         answer: 0
+      },
+      {
+        q: 'Which official website allows citizens to file cybercrime complaints online in India?',
+        options: ['https://cybercrime.gov.in', 'http://cyber-complaint.xyz', 'https://report-fraud-fast.tk'],
+        answer: 0
+      },
+      {
+        q: 'Besides calling 1930, who else should you notify immediately if your card or net banking was compromised?',
+        options: ['Your bank’s official customer care to block the compromised card/UPI', 'Random social media pages', 'Nobody'],
+        answer: 0
       }
     ],
     postAssessment: [
@@ -609,6 +759,16 @@ const learningModules = [
       {
         q: 'Why is reporting within the first 1–2 hours called the "Golden Hour"?',
         options: ['Banks can freeze the stolen funds before the scammer withdraws or moves them', 'Helpline is only open for 2 hours', 'It gives extra interest'],
+        answer: 0
+      },
+      {
+        q: 'Which set of details should you keep ready before dialing 1930?',
+        options: ['12-digit UTR number, exact transaction amount, date/time, and scammer’s UPI ID/phone number', 'Only your home Wi-Fi password', 'Your favorite movie'],
+        answer: 0
+      },
+      {
+        q: 'Should you delete scammer chats, call logs, or fake payment screenshots after losing money?',
+        options: ['No—preserve all screenshots, UTR receipts, and call logs as official investigation evidence', 'Yes, clear everything immediately', 'Only delete the UTR number'],
         answer: 0
       }
     ]
@@ -690,8 +850,8 @@ function renderModuleStep() {
         </ul>
         <div class="lesson-tip-box">🛡️ <strong>${mod.lesson.tip}</strong></div>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
-          <button type="button" class="btn-secondary" onclick="switchChapterStep('pre')">📝 Take Pre-Assessment</button>
-          <button type="button" class="btn-primary" onclick="switchChapterStep('post')">✅ Take Post-Assessment →</button>
+          <button type="button" class="btn-secondary" onclick="switchChapterStep('pre')">📝 Take Pre-Assessment (4 Qs)</button>
+          <button type="button" class="btn-primary" onclick="switchChapterStep('post')">✅ Take Post-Assessment (4 Qs) →</button>
         </div>
       </div>
     `;
@@ -703,7 +863,7 @@ function renderModuleStep() {
   const stageLabel = isPre ? `${mod.label} — Pre-Assessment` : `${mod.label} — Post-Assessment`;
 
   if (modQuizIdx >= questions.length) {
-    const passed = modQuizScore === questions.length;
+    const passed = modQuizScore >= 3; // Pass with at least 3/4 (75%)
     if (!isPre && passed) {
       if (!stats.completedChapters.includes(mod.id)) {
         stats.completedChapters.push(mod.id);
@@ -716,7 +876,7 @@ function renderModuleStep() {
     box.innerHTML = `
       <div class="result-box ${isPre || passed ? 'safe' : 'warn'}">
         <h4>${isPre ? '📝 Pre-Assessment Complete!' : (passed ? `🎉 ${mod.label} Post-Assessment Passed!` : `⚠️ ${mod.label} Post-Assessment Score: ${modQuizScore}/${questions.length}`)}</h4>
-        <p style="margin:0.5rem 0;">You scored <strong>${modQuizScore} out of ${questions.length}</strong>.</p>
+        <p style="margin:0.5rem 0;">You scored <strong>${modQuizScore} out of ${questions.length}</strong>${!isPre && !passed ? ' (Score at least 3/4 to mark this module complete).' : '.'}</p>
         <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.85rem;">
           ${isPre
             ? `<button type="button" class="btn-primary" onclick="switchChapterStep('lesson')">📖 Read ${mod.label} Content →</button>`
